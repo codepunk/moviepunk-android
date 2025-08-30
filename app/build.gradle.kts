@@ -1,12 +1,17 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.application)
+    /**********************************
+     * Supplied by New Project template
+     **********************************/
+    // This needs to be "id" due to buildSrc using Android Gradle plugin
+    id(libs.plugins.android.application.get().pluginId)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
+    libs.plugins.android.application
     namespace = "com.codepunk.moviepunk"
     compileSdk = 36
 
@@ -36,7 +41,16 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
+    }
+
+    applicationVariants.all {
+        // This is probably temporary
+        makeConstStringValue(
+            name = "app_name",
+            value = "MoviePunk"
+        )
     }
 }
 
@@ -47,7 +61,9 @@ kotlin {
 }
 
 dependencies {
-
+    /**********************************
+     * Supplied by New Project template
+     **********************************/
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
