@@ -19,6 +19,9 @@ plugins {
 
     // Hilt
     alias(libs.plugins.hilt)
+
+    // Serialization
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -97,6 +100,13 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Navigation
+    implementation(libs.navigation.compose)
+
+    // Serialization
+    implementation(libs.serialization)
 
 }

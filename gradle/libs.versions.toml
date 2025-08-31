@@ -18,11 +18,18 @@ composeBom = "2025.08.01"
 ##############################
 
 hilt = "2.57.1"
+hiltNavigationCompose = "1.2.0"
 javapoet = "1.13.0"
 
 # See https://github.com/google/ksp/releases
 # to find which ksp version works with with which version of kotlin
 ksp = "2.2.10-2.0.2"
+
+# AndroidX Navigation
+navigation = "2.9.3"
+
+# Kotlin serialization runtime library
+serialization = "1.9.0"
 
 [libraries]
 ##############################
@@ -54,12 +61,19 @@ android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", ve
 # Hilt Android Library
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
 # JavaPoet (needed due to an artifact introduced when using Hilt)
 javapoet = { group = "com.squareup", name = "javapoet", version.ref = "javapoet" }
 
 # Kotlin Gradle Plugin
 # kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kgp" }
+
+# Compose integration with Navigation
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+# Kotlin serialization runtime library
+serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
 [plugins]
 ##############################
@@ -78,3 +92,6 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 # Kotlin Symbol Processing (KSP) API
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+# Kotlin serialization
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

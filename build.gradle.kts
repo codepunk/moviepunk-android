@@ -19,4 +19,8 @@ plugins {
 
     // Hilt
     alias(libs.plugins.hilt) apply false
+
+    // Kotlin Serialization
+    alias(libs.plugins.serialization) apply false
+
 }
