@@ -3,7 +3,12 @@ plugins {
 }
 
 dependencies {
+    // Android Gradle Plugin
     implementation(libs.android.gradle.plugin)
-//    implementation(libs.kotlin.gradle.plugin)
-//    implementation(libs.javapoet) // Required because of an artifact introduced when using Hilt
+
+    // Kotlin Gradle Plugin
+    // implementation(libs.kotlin.gradle.plugin)
+
+    // JavaPoet - Required because of an artifact introduced when using Hilt with buildSrc
+    implementation(libs.javapoet)
 }

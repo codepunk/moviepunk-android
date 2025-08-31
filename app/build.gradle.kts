@@ -4,10 +4,21 @@ plugins {
     /**********************************
      * Supplied by New Project template
      **********************************/
+
     // This needs to be "id" due to buildSrc using Android Gradle plugin
     id(libs.plugins.android.application.get().pluginId)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    /**********************************
+     * Added by Codepunk
+     **********************************/
+
+    // Kotlin Symbol Processing (KSP)
+    alias(libs.plugins.ksp)
+
+    // Hilt
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -64,6 +75,7 @@ dependencies {
     /**********************************
      * Supplied by New Project template
      **********************************/
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -79,4 +91,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    /**********************************
+     * Added by Codepunk
+     **********************************/
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
 }

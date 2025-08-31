@@ -2,6 +2,7 @@
 ##############################
 # Supplied by New Project template
 ##############################
+
 agp = "8.12.2"
 kotlin = "2.2.10"
 coreKtx = "1.17.0"
@@ -15,12 +16,21 @@ composeBom = "2025.08.01"
 ##############################
 # Added by Codepunk
 ##############################
-kgp = "2.2.10" #2.0.21"
+
+hilt = "2.57.1"
+kgp = "2.2.10"
+
+javapoet = "1.13.0"
+
+# See https://github.com/google/ksp/releases
+# to find which ksp version works with with which version of kotlin
+ksp = "2.2.10-2.0.2"
 
 [libraries]
 ##############################
 # Supplied by New Project template
 ##############################
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -39,13 +49,35 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 ##############################
 # Added by Codepunk
 ##############################
+
+# Android Gradle Plugin
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+
+# Hilt Android Library
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+
+# JavaPoet (needed due to an artifact introduced when using Hilt)
+javapoet = { group = "com.squareup", name = "javapoet", version.ref = "javapoet" }
+
+# Kotlin Gradle Plugin
 # kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kgp" }
 
 [plugins]
 ##############################
 # Supplied by New Project template
 ##############################
+
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+##############################
+# Added by Codepunk
+##############################
+
+# Hilt Gradle Plugin
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+# Kotlin Symbol Processing (KSP) API
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
