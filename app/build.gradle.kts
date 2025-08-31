@@ -6,7 +6,7 @@ plugins {
      **********************************/
 
     // This needs to be "id" due to buildSrc using Android Gradle plugin
-    id(libs.plugins.android.application.get().pluginId)
+    id("com.android.application")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
@@ -22,7 +22,6 @@ plugins {
 }
 
 android {
-    libs.plugins.android.application
     namespace = "com.codepunk.moviepunk"
     compileSdk = 36
 

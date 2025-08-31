@@ -6,7 +6,7 @@ plugins {
 
     // This needs to be "id" instead of "alias" due to buildSrc using Android Gradle plugin
     // alias(libs.plugins.android.application) apply false
-    id(libs.plugins.android.application.get().pluginId) apply false
+    id("com.android.application") apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
 
