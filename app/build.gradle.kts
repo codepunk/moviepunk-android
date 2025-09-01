@@ -59,10 +59,22 @@ android {
     }
 
     applicationVariants.all {
-        // This is probably temporary
-        makeConstStringValue(
-            name = "app_name",
-            value = "MoviePunk"
+        extractLocalProperty(
+            project.rootProject,
+            "TheMovieDbAccessToken",
+            "THE_MOVIE_DB_ACCESS_TOKEN"
+        )
+
+        buildConfigField(
+            "long",
+            "OK_HTTP_CLIENT_CACHE_SIZE",
+            "10 * 1024 * 1024"
+        )
+
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"https://api.themoviedb.org/3/\""
         )
     }
 }
@@ -98,6 +110,14 @@ dependencies {
      * Added by Codepunk
      **********************************/
 
+    // Arrow
+    implementation(libs.arrow.core)
+    implementation(libs.arrow.fx.coroutines)
+    implementation(libs.arrow.core.retrofit)
+
+    // Datetime
+    implementation(libs.kotlinx.datetime)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
@@ -105,6 +125,10 @@ dependencies {
 
     // Navigation
     implementation(libs.navigation.compose)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.serialization)
 
     // Serialization
     implementation(libs.serialization)
