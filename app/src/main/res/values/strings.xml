@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MoviePunk</string>
+    <string name="not_connected_to_internet">Not connected to Internet</string>
 </resources>

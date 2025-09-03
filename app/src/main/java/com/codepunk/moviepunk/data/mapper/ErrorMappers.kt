@@ -1,9 +1,9 @@
 package com.codepunk.moviepunk.data.mapper
 
-import com.codepunk.moviepunk.data.remote.entity.RemoteApiError
-import com.codepunk.moviepunk.domain.model.ApiError
+import com.codepunk.moviepunk.data.remote.entity.RemoteApiStatus
+import com.codepunk.moviepunk.domain.model.ApiStatus
 
-fun RemoteApiError.toApiError() = ApiError(
+fun RemoteApiStatus.toApiStatus() = ApiStatus(
     success = success,
     statusCode = statusCode,
     statusMessage = statusMessage

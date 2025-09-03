@@ -4,6 +4,8 @@ import android.content.Context
 import arrow.retrofit.adapter.either.EitherCallAdapterFactory
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.remote.interceptor.MoviePunkAuthInterceptor
+import com.codepunk.moviepunk.data.remote.interceptor.NetworkConnectionInterceptor
+import com.codepunk.moviepunk.data.remote.interceptor.UserAgentInterceptor
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import dagger.Module
 import dagger.Provides
@@ -34,17 +36,13 @@ class RemoteModule {
     @Provides
     fun provideDiscogsOkHttpClient(
         cache: Cache,
-        /* TODO Should I create a NetworkConnectionInterceptor?
         networkConnectionInterceptor: NetworkConnectionInterceptor,
-        userAgentInterceptor: HollarhypeUserAgentInterceptor,
-         */
+        userAgentInterceptor: UserAgentInterceptor,
         authInterceptor: MoviePunkAuthInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
         .cache(cache)
-        /*
         .addInterceptor(networkConnectionInterceptor)
         .addInterceptor(userAgentInterceptor)
-         */
         .addInterceptor(authInterceptor)
         .build()
 

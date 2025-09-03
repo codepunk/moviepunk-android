@@ -65,6 +65,11 @@ android {
             "THE_MOVIE_DB_ACCESS_TOKEN"
         )
 
+        makeConstStringValue(
+            name = "APPLICATION_NAME",
+            value = "MoviePunk"
+        )
+
         buildConfigField(
             "long",
             "OK_HTTP_CLIENT_CACHE_SIZE",

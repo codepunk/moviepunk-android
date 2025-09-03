@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RemoteApiError(
+data class RemoteApiStatus(
     val success: Boolean = false,
 
     @SerialName(value = "status_code")
