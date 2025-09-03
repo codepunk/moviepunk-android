@@ -18,6 +18,9 @@ class MoviePunkRepositoryImpl(
 
     override suspend fun fetchTrendingMovies(): Flow<Either<Exception, MoviePage>> = flow {
         // TODO Incorporate Room, paging, etc.
+        //  Also this still doesn't let us see headers in the response.
+        //  We have them in webservice.fetchTrendingMovies() but lose them
+        //  when we convert toEither.
         try {
             webservice.fetchTrendingMovies()
                 .toEither { it.toMoviePage() }
