@@ -120,6 +120,10 @@ dependencies {
     implementation(libs.arrow.fx.coroutines)
     implementation(libs.arrow.core.retrofit)
 
+    // Datastore
+    implementation(libs.datastore.preferences)
+    implementation(libs.datastore.proto)
+
     // Datetime
     implementation(libs.kotlinx.datetime)
 
@@ -134,6 +138,13 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.serialization)
+
+    // Room
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    testImplementation(libs.room.testing)
+    implementation(libs.room.paging)
 
     // Serialization
     implementation(libs.serialization)
