@@ -16,8 +16,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.time.Clock
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
+import kotlin.time.Duration.Companion.minutes
 
 /*
  * TODO Investigate some way to have this manager maintain a flow of genre and other data
@@ -92,10 +91,9 @@ class DataUpdateManager @Inject constructor(
     private fun checkAndUpdateData() {
         if (!dataUpdated) {
             ProcessLifecycleOwner.get().lifecycleScope.launch(ioDispatcher) {
-                val refresh = BuildConfig.DATA_REFRESH_DURATION_MINUTES.toDuration(DurationUnit.MINUTES)
                 val newest = moviePunkRepository.getNewestGenre()
                 val elapsed = Clock.System.now() - newest
-                if (elapsed > refresh) {
+                if (elapsed > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes) {
                     Timber.i("Data is out of date, updating")
                     moviePunkRepository.cacheGenres().onLeft { e ->
                         // TODO Handle exception

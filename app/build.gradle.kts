@@ -43,7 +43,7 @@ android {
             buildConfigField(
                 "long",
                 "DATA_REFRESH_DURATION_MINUTES",
-                "1"
+                "1L"
             )
         }
 
@@ -54,12 +54,11 @@ android {
                 "proguard-rules.pro"
             )
 
-            val minsPerHour = 60
-            val hoursPerDay = 24
+            val minutesPerDay = 60L * 24L
             buildConfigField(
                 "long",
-                "DATA_REFRESH_DURATION_MINUTES",
-                "$minsPerHour * $hoursPerDay * 30"
+                "DATA_REFRESH_DURATION",
+                "${minutesPerDay * 30}L"
             )
         }
     }

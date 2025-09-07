@@ -65,7 +65,7 @@ abstract class GenreDao {
     // TODO Should I make these return values into Flows?
 
     @Query("SELECT * FROM genre")
-    abstract suspend fun getGenres(): Flow<List<LocalGenre>>
+    abstract fun getGenres(): Flow<List<LocalGenre>>
 
     @Query("""
         SELECT * 
@@ -73,7 +73,7 @@ abstract class GenreDao {
         INNER JOIN movie_genre 
         ON genre.id = movie_genre.id
     """)
-    abstract suspend fun getMovieGenres(): Flow<List<LocalGenre>>
+    abstract fun getMovieGenres(): Flow<List<LocalGenre>>
 
     @Query("""
         SELECT * 
@@ -81,7 +81,7 @@ abstract class GenreDao {
         INNER JOIN tv_genre 
         ON genre.id = tv_genre.id
     """)
-    abstract suspend fun getTvGenres(): Flow<List<LocalGenre>>
+    abstract fun getTvGenres(): Flow<List<LocalGenre>>
 
     @Query("SELECT max(created_at) FROM genre")
     abstract suspend fun getNewestGenre(): Instant
