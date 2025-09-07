@@ -39,11 +39,27 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "long",
+                "DATA_REFRESH_DURATION_MINUTES",
+                "1"
+            )
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
+            )
+
+            val minsPerHour = 60
+            val hoursPerDay = 24
+            buildConfigField(
+                "long",
+                "DATA_REFRESH_DURATION_MINUTES",
+                "$minsPerHour * $hoursPerDay * 30"
             )
         }
     }
@@ -87,6 +103,7 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
+        optIn.add("kotlin.time.ExperimentalTime")
     }
 }
 
@@ -132,6 +149,9 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
+    // Lifecycle
+    implementation(libs.lifecycle.process)
+
     // Navigation
     implementation(libs.navigation.compose)
 
@@ -148,5 +168,8 @@ dependencies {
 
     // Serialization
     implementation(libs.serialization)
+
+    // Timber
+    implementation(libs.timber)
 
 }

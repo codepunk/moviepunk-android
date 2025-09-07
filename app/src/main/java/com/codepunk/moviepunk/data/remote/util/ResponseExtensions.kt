@@ -9,9 +9,13 @@ import com.codepunk.moviepunk.util.exception.ApiException
 import com.codepunk.moviepunk.util.exception.HttpException
 import com.codepunk.moviepunk.util.http.HttpStatus
 import kotlinx.serialization.json.Json
+import okhttp3.Headers
 import retrofit2.Response
 
-fun <T> Response<T>.toEither(): Either<Exception, T> =
+fun <T> Response<T>.toEither(
+    @Suppress("unused")
+    onHeaders: (Headers) -> Unit = {}
+): Either<Exception, T> =
     if (isSuccessful) {
         body()?.right()
             ?: IllegalStateException("Response code is ${code()} but body is null.").left()

@@ -4,6 +4,8 @@ import com.codepunk.moviepunk.data.remote.entity.RemoteMovie
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.Movie
 
+// TODO NEXT Let's start doing LocalMovie, handle genre IDs, etc.
+
 fun RemoteMovie.toMovie(): Movie = Movie(
     adult = adult,
     backdropPath = backdropPath,

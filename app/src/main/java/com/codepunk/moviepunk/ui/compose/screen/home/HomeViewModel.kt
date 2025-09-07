@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
+import com.codepunk.moviepunk.manager.DataUpdateManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,9 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val repository: MoviePunkRepository
+    private val repository: MoviePunkRepository,
+    @Suppress("unused")
+    private val dataUpdateManager: DataUpdateManager
 ) : ViewModel() {
 
     // region Variables
@@ -32,16 +35,16 @@ class HomeViewModel @Inject constructor(
     // region Constructors
 
     init {
-        fetchTrendingMovies()
+        getTrendingMovies()
     }
 
     // endregion Constructors
 
     // region Methods
 
-    fun fetchTrendingMovies() {
+    fun getTrendingMovies() {
         viewModelScope.launch(context = ioDispatcher) {
-            repository.fetchTrendingMovies().collect {
+            repository.getTrendingMovies().collect {
                 state = state.copy()
             }
         }

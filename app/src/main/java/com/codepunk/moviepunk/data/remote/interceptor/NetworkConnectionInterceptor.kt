@@ -18,7 +18,7 @@ class NetworkConnectionInterceptor @Inject constructor(
     // region Methods
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        if (!connectivityManager.isConnected()) {
+        if (!connectivityManager.isConnected) {
             throw NoConnectivityException(
                 message = context.getString(R.string.not_connected_to_internet)
             )

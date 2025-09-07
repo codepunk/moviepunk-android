@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.di.module
 
+import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
@@ -18,9 +19,9 @@ class DataModule {
     @Singleton
     @Provides
     fun provideMoviePunkRepository(
+        db: MoviePunkDatabase,
         /* TODO
         connectivityManager: ConnectivityManager,
-        database: HollarhypeDatabase,
         dataStore: DataStore<UserSettings>,
          */
         webservice: MoviePunkWebservice
@@ -28,10 +29,10 @@ class DataModule {
         activityFeedRemoteMediatorFactory: ActivityFeedRemoteMediatorFactory
          */
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
+        db = db,
         /* TODO
         connectivityManager = connectivityManager,
         dataStore = dataStore,
-        database = database,
          */
         webservice = webservice,
         /*
