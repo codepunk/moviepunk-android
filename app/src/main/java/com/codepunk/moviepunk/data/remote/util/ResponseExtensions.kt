@@ -1,8 +1,8 @@
 package com.codepunk.moviepunk.data.remote.util
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
+import arrow.core.raise.ensureNotNull
 import com.codepunk.moviepunk.data.mapper.toApiStatus
 import com.codepunk.moviepunk.data.remote.entity.RemoteApiStatus
 import com.codepunk.moviepunk.util.exception.ApiException
@@ -12,22 +12,40 @@ import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import retrofit2.Response
 
-fun <T> Response<T>.toEither(
-    @Suppress("unused")
-    onHeaders: (Headers) -> Unit = {}
-): Either<Exception, T> =
+fun <R, D> Response<R>.toEither(
+    onHeaders: (Headers) -> Unit = {},
+    ifUnsuccessful: (HttpStatus, String) -> Exception = { httpStatus, _ ->
+        HttpException(httpStatus = httpStatus)
+    },
+    transform: (R) -> D
+): Either<Exception, D> = either {
+    onHeaders(headers())
     if (isSuccessful) {
-        body()?.right()
-            ?: IllegalStateException("Response code is ${code()} but body is null.").left()
+        val body = body()
+        ensureNotNull(body) { IllegalStateException("Body is null") }
+        transform(body)
     } else {
         val httpStatus: HttpStatus = HttpStatus.of(code())
-        val exception = errorBody()?.string()?.run {
-            try {
-                val apiStatus = Json.decodeFromString<RemoteApiStatus>(this).toApiStatus()
-                ApiException(httpStatus = httpStatus, apiStatus = apiStatus)
-            } catch (e: Exception) {
-                e
-            }
-        } ?: HttpException(httpStatus = httpStatus)
-        exception.left()
+        val errorBodyString = errorBody()?.string()
+        ensureNotNull(errorBodyString) { HttpException(httpStatus = httpStatus) }
+        raise(ifUnsuccessful(httpStatus, errorBodyString))
     }
+}
+
+fun <R, D> Response<R>.toApiEither(
+    onHeaders: (Headers) -> Unit = {},
+    transform: (R) -> D
+): Either<Exception, D> = toEither(
+    onHeaders = onHeaders,
+    ifUnsuccessful = { httpStatus, errorBodyString ->
+        try {
+            ApiException(
+                httpStatus = httpStatus,
+                apiStatus = Json.decodeFromString<RemoteApiStatus>(errorBodyString).toApiStatus()
+            )
+        } catch (e: Exception) {
+            e
+        }
+    },
+    transform = transform
+)

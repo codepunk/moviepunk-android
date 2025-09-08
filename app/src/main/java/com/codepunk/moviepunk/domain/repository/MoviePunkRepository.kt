@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.domain.repository
 
+import app.cash.quiver.extensions.OutcomeOf
 import arrow.core.Either
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MoviePage
@@ -10,9 +11,7 @@ interface MoviePunkRepository {
 
     // region Methods
 
-    suspend fun cacheGenres(): Either<Exception, Unit>
-
-    suspend fun getGenres(): Flow<Either<Exception, List<Genre>>>
+    suspend fun getGenres(): Flow<OutcomeOf<List<Genre>>>
 
     suspend fun getMovieGenres(): Flow<Either<Exception, List<Genre>>>
 

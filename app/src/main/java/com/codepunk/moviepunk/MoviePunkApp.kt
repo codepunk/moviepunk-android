@@ -8,6 +8,16 @@ import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import javax.inject.Inject
 
+/**
+ * TODO Ongoing thoughts:
+ *  * A repository that returns Either<Exception, Data> will appear to be done loading
+ *    immediately and return the local cached data, when in reality it could still be
+ *    fetching remote data. Somewhere we need to show that it is fetching new data.
+ *    We could make a Left that is a sealed class of (data object) Loading or Exception and it
+ *    corresponds to an "incomplete" data request. (We could make an "IncompleteException"
+ *    class as well but that seems overkill and not quite appropriate?)
+ */
+
 @HiltAndroidApp
 class MoviePunkApp : Application() {
 
@@ -15,9 +25,6 @@ class MoviePunkApp : Application() {
 
     @Inject
     lateinit var processLifecycleObserver: ProcessLifecycleObserver
-
-    //@Inject
-    //lateinit var dataUpdateManager: DataUpdateManager
 
     // region Methods
 

@@ -29,6 +29,7 @@ hiltNavigationCompose = "1.2.0"
 javapoet = "1.13.0"
 lifecycle = "2.9.3"
 navigation = "2.9.3"
+quiver = "1.0.2"
 retrofit = "3.0.0"
 room = "2.7.2"
 serialization = "1.9.0"
@@ -61,10 +62,11 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 # Android Gradle Plugin
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 
-# Arrow
+# Arrow (and Quiver)
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { group = "io.arrow-kt", name = "arrow-fx-coroutines", version.ref = "arrow" }
 arrow-core-retrofit = { group = "io.arrow-kt", name = "arrow-core-retrofit", version.ref = "arrow" }
+quiver = { group = "app.cash.quiver", name = "lib", version.ref = "quiver" }
 
 # Datastore (Preferences)
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

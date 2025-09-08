@@ -1,6 +1,7 @@
 package com.codepunk.moviepunk.ui.compose.screen.home
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -13,17 +14,26 @@ import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
 
 @Composable
 fun HomeScreen(
-    @Suppress("unused") state: HomeState,
+    state: HomeState,
     modifier: Modifier = Modifier,
-    @Suppress("unused") onEvent: (HomeEvent) -> Unit
+    @Suppress("unused")
+    onEvent: (HomeEvent) -> Unit
 ) {
-    Box(
+    Column(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Home Screen"
         )
+        if (state.genresLoading) {
+            Text(text = "Genres loading...")
+        }
+        state.genresThrowable?.apply {
+            Text(text = "Genre error: ${this::class.java.simpleName} | ${this.message}")
+        }
+        Text(text = "${state.genres.size} genres found.")
     }
 }
 

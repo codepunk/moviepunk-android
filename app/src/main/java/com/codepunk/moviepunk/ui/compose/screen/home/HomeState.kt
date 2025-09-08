@@ -1,5 +1,9 @@
 package com.codepunk.moviepunk.ui.compose.screen.home
 
+import com.codepunk.moviepunk.domain.model.Genre
+
 data class HomeState(
-    val dummy: String = ""
+    val genresLoading: Boolean = false,
+    val genresThrowable: Throwable? = null,
+    val genres: List<Genre> = emptyList()
 )

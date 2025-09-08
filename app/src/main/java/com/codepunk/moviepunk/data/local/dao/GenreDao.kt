@@ -8,7 +8,6 @@ import androidx.room.Transaction
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
 import com.codepunk.moviepunk.data.local.entity.LocalMovieGenre
 import com.codepunk.moviepunk.data.local.entity.LocalTvGenre
-import kotlinx.coroutines.flow.Flow
 import kotlin.time.Instant
 
 @Dao
@@ -65,7 +64,7 @@ abstract class GenreDao {
     // TODO Should I make these return values into Flows?
 
     @Query("SELECT * FROM genre")
-    abstract fun getGenres(): Flow<List<LocalGenre>>
+    abstract suspend fun getGenres(): List<LocalGenre>
 
     @Query("""
         SELECT * 
@@ -73,7 +72,7 @@ abstract class GenreDao {
         INNER JOIN movie_genre 
         ON genre.id = movie_genre.id
     """)
-    abstract fun getMovieGenres(): Flow<List<LocalGenre>>
+    abstract suspend fun getMovieGenres(): List<LocalGenre>
 
     @Query("""
         SELECT * 
@@ -81,7 +80,7 @@ abstract class GenreDao {
         INNER JOIN tv_genre 
         ON genre.id = tv_genre.id
     """)
-    abstract fun getTvGenres(): Flow<List<LocalGenre>>
+    abstract suspend fun getTvGenres(): List<LocalGenre>
 
     @Query("SELECT max(created_at) FROM genre")
     abstract suspend fun getNewestGenre(): Instant
