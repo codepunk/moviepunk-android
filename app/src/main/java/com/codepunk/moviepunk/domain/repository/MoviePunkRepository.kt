@@ -5,7 +5,6 @@ import arrow.core.Either
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MoviePage
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Instant
 
 interface MoviePunkRepository {
 
@@ -17,9 +16,7 @@ interface MoviePunkRepository {
 
     suspend fun getTvGenres(): Flow<Either<Exception, List<Genre>>>
 
-    suspend fun getNewestGenre(): Instant
-
-    suspend fun getTrendingMovies(): Flow<Either<Exception, MoviePage>>
+    suspend fun getTrendingMovies(): Flow<OutcomeOf<MoviePage>>
 
     // endregion Methods
 

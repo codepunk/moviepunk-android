@@ -30,6 +30,8 @@ class DataModule {
          */
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         db = db,
+        genreDao = db.genreDao(),
+        movieDao = db.movieDao(),
         /* TODO
         connectivityManager = connectivityManager,
         dataStore = dataStore,

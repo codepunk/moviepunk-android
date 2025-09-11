@@ -1,9 +1,8 @@
 package com.codepunk.moviepunk.data.mapper
 
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.local.entity.LocalMovieGenre
-import com.codepunk.moviepunk.data.local.entity.LocalTvGenre
 import com.codepunk.moviepunk.data.remote.entity.RemoteGenre
+import com.codepunk.moviepunk.data.remote.entity.RemoteGenreListResult
 import com.codepunk.moviepunk.domain.model.Genre
 import kotlin.time.Clock
 
@@ -13,28 +12,34 @@ import kotlin.time.Clock
 // Remote to local
 // ====================
 
-fun RemoteGenre.toLocalGenre() = Clock.System.now().let { now ->
+fun RemoteGenre.toLocalGenre(
+    isMovieGenre: Boolean,
+    isTvGenre: Boolean
+) = Clock.System.now().let { now ->
     LocalGenre(
         id = id,
         name = name,
+        isMovieGenre = isMovieGenre,
+        isTvGenre = isTvGenre,
         createdAt = now,
         updatedAt = now
     )
 }
 
-@Suppress("unused")
-fun RemoteGenre.toLocalMovieGenre() = LocalMovieGenre(id = id)
-
-@Suppress("unused")
-fun RemoteGenre.toLocalTvGenre() = LocalTvGenre(id = id)
-
-// ====================
-// Local cast
-// ====================
-
-fun LocalGenre.toLocalMovieGenre() = LocalMovieGenre(id = id)
-
-fun LocalGenre.toLocalTvGenre() = LocalTvGenre(id = id)
+fun toLocalGenres(
+    movieResult: RemoteGenreListResult,
+    tvResult: RemoteGenreListResult
+): List<LocalGenre> {
+    val movieGenreIds = movieResult.genres.map { it.id }.toSet()
+    val tvGenreIds = tvResult.genres.map { it.id }.toSet()
+    val allRemoteGenres = (movieResult.genres + tvResult.genres).distinctBy { it.id }
+    return allRemoteGenres.map { remoteGenre ->
+        remoteGenre.toLocalGenre(
+            isMovieGenre = movieGenreIds.contains(remoteGenre.id),
+            isTvGenre = tvGenreIds.contains(remoteGenre.id)
+        )
+    }
+}
 
 // ====================
 // Local to domain

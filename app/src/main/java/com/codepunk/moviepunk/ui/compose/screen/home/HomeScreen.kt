@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
+import timber.log.Timber
 
 @Composable
 fun HomeScreen(
@@ -19,6 +20,8 @@ fun HomeScreen(
     @Suppress("unused")
     onEvent: (HomeEvent) -> Unit
 ) {
+    Timber.d(message = "state=$state")
+    
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -30,7 +33,7 @@ fun HomeScreen(
         if (state.genresLoading) {
             Text(text = "Genres loading...")
         }
-        state.genresThrowable?.apply {
+        state.genresError?.apply {
             Text(text = "Genre error: ${this::class.java.simpleName} | ${this.message}")
         }
         Text(text = "${state.genres.size} genres found.")

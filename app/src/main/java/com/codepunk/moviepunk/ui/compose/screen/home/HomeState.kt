@@ -4,6 +4,6 @@ import com.codepunk.moviepunk.domain.model.Genre
 
 data class HomeState(
     val genresLoading: Boolean = false,
-    val genresThrowable: Throwable? = null,
-    val genres: List<Genre> = emptyList()
+    val genres: List<Genre> = emptyList(),
+    val genresError: Throwable? = null
 )

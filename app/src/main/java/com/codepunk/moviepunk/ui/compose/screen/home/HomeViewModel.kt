@@ -2,7 +2,7 @@ package com.codepunk.moviepunk.ui.compose.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.cash.quiver.fold
+import app.cash.quiver.getOrElse
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,25 +44,20 @@ class HomeViewModel @Inject constructor(
 
     fun getGenres() {
         viewModelScope.launch(context = ioDispatcher) {
-            repository.getGenres().collect { outcome ->
-                Timber.d(message = "Genres: $outcome")
-                state = outcome.fold(
-                    onAbsent = {
-                        state.copy(genresLoading = true)
-                    },
-                    onPresent = { genres ->
-                        state.copy(
-                            genresLoading = false,
-                            genres = genres,
-                            genresThrowable = null
-                        )
-                    },
-                    onFailure = { th ->
-                        state.copy(
-                            genresLoading = false,
-                            genres = emptyList(),
-                            genresThrowable = th
-                        )
+            repository.getGenres().collect { result ->
+                Timber.d(message = "Genres: $result")
+
+                /* If result.left has a value, use that
+                 * else if right has a value, null
+                 * else use existing value
+                 */
+                state = state.copy(
+                    genresLoading = result.isAbsent(),
+                    genres = result.getOrElse { state.genres },
+                    genresError = when {
+                        result.isFailure() -> result.inner.leftOrNull()
+                        result.isPresent() -> null
+                        else -> state.genresError
                     }
                 )
             }

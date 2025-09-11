@@ -64,6 +64,11 @@ android {
     }
 
     compileOptions {
+        // Enable desugaring for legacy java libraries. This is required for
+        // Java 8+ API desugaring, which allows us to use newer Java APIs
+        // on older Android devices.
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -143,6 +148,9 @@ dependencies {
 
     // Datetime
     implementation(libs.kotlinx.datetime)
+
+    // Desugaring (for using java.time APIs on older Android versions)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // Hilt
     implementation(libs.hilt.android)

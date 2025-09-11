@@ -3,15 +3,15 @@
 # Supplied by New Project template
 ##############################
 
-agp = "8.12.2"
+agp = "8.12.3"
 kotlin = "2.2.10"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.9.3"
-activityCompose = "1.10.1"
-composeBom = "2025.08.01"
+activityCompose = "1.11.0"
+composeBom = "2025.09.00"
 
 ##############################
 # Added by Codepunk
@@ -24,14 +24,15 @@ ksp = "2.2.10-2.0.2"
 arrow = "2.1.2"
 datastore = "1.1.7"
 datetime = "0.7.1"
+desugar = "2.1.5"
 hilt = "2.57.1"
-hiltNavigationCompose = "1.2.0"
+hiltNavigationCompose = "1.3.0"
 javapoet = "1.13.0"
 lifecycle = "2.9.3"
-navigation = "2.9.3"
+navigation = "2.9.4"
 quiver = "1.0.2"
 retrofit = "3.0.0"
-room = "2.7.2"
+room = "2.8.0"
 serialization = "1.9.0"
 timber = "5.0.1"
 
@@ -76,6 +77,9 @@ datastore-proto = { group = "androidx.datastore", name = "datastore", version.re
 
 # Datetime
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "datetime" }
+
+# Desugar (for using java.time APIs on older Android versions)
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 # Hilt Android Library
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }

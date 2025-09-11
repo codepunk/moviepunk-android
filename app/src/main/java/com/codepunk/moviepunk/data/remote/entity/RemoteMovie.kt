@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RemoteMovie(
+    val id: Int = 0,
+
     val adult: Boolean = false,
 
     @SerialName(value = "backdrop_path")
     val backdropPath: String = "",
-
-    val id: Int = 0,
 
     val title: String = "",
 

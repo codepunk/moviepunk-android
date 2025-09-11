@@ -1,25 +1,29 @@
 package com.codepunk.moviepunk.data.mapper
 
+import com.codepunk.moviepunk.data.local.entity.LocalMovie
+import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenreIds
+import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
+import com.codepunk.moviepunk.data.remote.entity.RemoteGenre
 import com.codepunk.moviepunk.data.remote.entity.RemoteMovie
-import com.codepunk.moviepunk.domain.model.Genre
-import com.codepunk.moviepunk.domain.model.Movie
 
-// TODO NEXT Let's start doing LocalMovie, handle genre IDs, etc.
-
-fun RemoteMovie.toMovie(): Movie = Movie(
+fun RemoteMovie.toLocalMovie(): LocalMovie = LocalMovie(
+    id = id,
     adult = adult,
     backdropPath = backdropPath,
-    id = id,
     title = title,
     originalLanguage = originalLanguage,
     originalTitle = originalTitle,
     overview = overview,
     posterPath = posterPath,
     mediaType = mediaType,
-    genres = emptyList<Genre>(), // TODO genreIds.map { Genre(id = it) },
     popularity = popularity,
     releaseDate = releaseDate,
     video = video,
     voteAverage = voteAverage,
     voteCount = voteCount
+)
+
+fun RemoteMovie.toLocalMovieWithGenreId(): LocalMovieWithGenreIds = LocalMovieWithGenreIds(
+    movie = toLocalMovie(),
+    genreIds
 )

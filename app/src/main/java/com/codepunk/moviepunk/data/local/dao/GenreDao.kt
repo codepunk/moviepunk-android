@@ -4,10 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.local.entity.LocalMovieGenre
-import com.codepunk.moviepunk.data.local.entity.LocalTvGenre
 import kotlin.time.Instant
 
 @Dao
@@ -20,31 +17,7 @@ abstract class GenreDao {
     // ====================
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertGenres(
-        genres: List<LocalGenre>
-    )
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun insertMovieGenres(
-        movieGenres: List<LocalMovieGenre>
-    )
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun insertTvGenres(
-        tvGenres: List<LocalTvGenre>
-    )
-
-    @Transaction
-    open suspend fun insertGenres(
-        genres: List<LocalGenre>,
-        movieGenres: List<LocalMovieGenre>,
-        tvGenres: List<LocalTvGenre>
-    ) {
-        clearGenres()
-        insertGenres(genres)
-        insertMovieGenres(movieGenres)
-        insertTvGenres(tvGenres)
-    }
+    abstract suspend fun insertGenres(genres: List<LocalGenre>)
 
     // ====================
     // Delete
@@ -66,20 +39,10 @@ abstract class GenreDao {
     @Query("SELECT * FROM genre")
     abstract suspend fun getGenres(): List<LocalGenre>
 
-    @Query("""
-        SELECT * 
-        FROM genre
-        INNER JOIN movie_genre 
-        ON genre.id = movie_genre.id
-    """)
+    @Query("SELECT * FROM genre WHERE is_movie_genre = 1")
     abstract suspend fun getMovieGenres(): List<LocalGenre>
 
-    @Query("""
-        SELECT * 
-        FROM genre
-        INNER JOIN tv_genre 
-        ON genre.id = tv_genre.id
-    """)
+    @Query("SELECT * FROM genre WHERE is_tv_genre = 1")
     abstract suspend fun getTvGenres(): List<LocalGenre>
 
     @Query("SELECT max(created_at) FROM genre")

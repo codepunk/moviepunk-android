@@ -3,9 +3,9 @@ package com.codepunk.moviepunk.domain.model
 import kotlinx.datetime.LocalDate
 
 data class Movie(
+    val id: Int = 0,
     val adult: Boolean = false,
     val backdropPath: String = "",
-    val id: Int = 0,
     val title: String = "",
     val originalLanguage: String = "",
     val originalTitle: String = "",

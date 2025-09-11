@@ -12,18 +12,16 @@ import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import retrofit2.Response
 
-fun <R, D> Response<R>.toEither(
+fun <R> Response<R>.toEither(
     onHeaders: (Headers) -> Unit = {},
     ifUnsuccessful: (HttpStatus, String) -> Exception = { httpStatus, _ ->
         HttpException(httpStatus = httpStatus)
-    },
-    transform: (R) -> D
-): Either<Exception, D> = either {
+    }
+): Either<Exception, R> = either {
     onHeaders(headers())
     if (isSuccessful) {
         val body = body()
         ensureNotNull(body) { IllegalStateException("Body is null") }
-        transform(body)
     } else {
         val httpStatus: HttpStatus = HttpStatus.of(code())
         val errorBodyString = errorBody()?.string()
@@ -32,10 +30,9 @@ fun <R, D> Response<R>.toEither(
     }
 }
 
-fun <R, D> Response<R>.toApiEither(
-    onHeaders: (Headers) -> Unit = {},
-    transform: (R) -> D
-): Either<Exception, D> = toEither(
+fun <R> Response<R>.toApiEither(
+    onHeaders: (Headers) -> Unit = {}
+): Either<Exception, R> = toEither(
     onHeaders = onHeaders,
     ifUnsuccessful = { httpStatus, errorBodyString ->
         try {
@@ -46,6 +43,5 @@ fun <R, D> Response<R>.toApiEither(
         } catch (e: Exception) {
             e
         }
-    },
-    transform = transform
+    }
 )
