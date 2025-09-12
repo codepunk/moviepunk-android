@@ -4,7 +4,6 @@ import app.cash.quiver.Absent
 import app.cash.quiver.extensions.OutcomeOf
 import app.cash.quiver.failure
 import app.cash.quiver.present
-import arrow.core.Either
 import arrow.core.raise.either
 import com.codepunk.moviepunk.BuildConfig.DATA_REFRESH_DURATION_MINUTES
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
@@ -87,13 +86,13 @@ class MoviePunkRepositoryImpl(
             }
         }
 
-    override suspend fun getMovieGenres(): Flow<Either<Exception, List<Genre>>> = flow {
-        // TODO
-    }
+    override suspend fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
+        emit(Absent)
+    }.flowOn(ioDispatcher)
 
-    override suspend fun getTvGenres(): Flow<Either<Exception, List<Genre>>> = flow {
-        // TODO
-    }
+    override suspend fun getTvGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
+        emit(Absent)
+    }.flowOn(ioDispatcher)
 
     // endregion Methods
 
