@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RemoteMovie(
-    val id: Int = 0,
+    val id: Long = 0,
 
     val adult: Boolean = false,
 

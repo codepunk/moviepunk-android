@@ -66,9 +66,7 @@ class HomeViewModel @Inject constructor(
 
     fun getTrendingMovies() {
         viewModelScope.launch(context = ioDispatcher) {
-            repository.getTrendingMovies().collect {
-                state = state.copy()
-            }
+
         }
     }
 

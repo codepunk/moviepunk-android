@@ -101,6 +101,12 @@ android {
             "BASE_URL",
             "\"https://api.themoviedb.org/3/\""
         )
+
+        buildConfigField(
+            "int",
+            "TMDB_PAGE_SIZE",
+            "20"
+        )
     }
 }
 
@@ -162,6 +168,10 @@ dependencies {
 
     // Navigation
     implementation(libs.navigation.compose)
+
+    // Paging
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 
     // Retrofit
     implementation(libs.retrofit)

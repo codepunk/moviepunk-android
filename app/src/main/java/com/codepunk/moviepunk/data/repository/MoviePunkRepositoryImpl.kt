@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.data.repository
 
+import android.content.Context
 import androidx.room.withTransaction
 import app.cash.quiver.Absent
 import app.cash.quiver.extensions.OutcomeOf
@@ -17,7 +18,6 @@ import com.codepunk.moviepunk.data.mapper.toLocalGenres
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.Genre
-import com.codepunk.moviepunk.domain.model.MoviePage
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,11 +28,20 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 class MoviePunkRepositoryImpl(
+    private val context: Context,
     private val db: MoviePunkDatabase,
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice
 ) : MoviePunkRepository {
+
+    // region Properties
+
+    private val language by lazy {
+        context.resources.configuration.locales[0].toLanguageTag()
+    }
+
+    // endregion Properties
 
     // region Methods
 
@@ -61,8 +70,8 @@ class MoviePunkRepositoryImpl(
                 try {
                     // Fetch remote genres and convert to local
                     val localGenres = toLocalGenres(
-                        movieResult = webservice.fetchMovieGenres().toApiEither().bind(),
-                        tvResult = webservice.fetchTvGenres().toApiEither().bind()
+                        movieResult = webservice.fetchMovieGenres(language).toApiEither().bind(),
+                        tvResult = webservice.fetchTvGenres(language).toApiEither().bind()
                     )
 
                     // Cache fetched genres to local db
@@ -98,18 +107,6 @@ class MoviePunkRepositoryImpl(
     override suspend fun getTvGenres(): Flow<Either<Exception, List<Genre>>> = flow {
         // TODO
     }
-
-    override suspend fun getTrendingMovies(): Flow<OutcomeOf<MoviePage>> =
-        getGenres().map { genresOutcome ->
-
-            // TODO NEXT
-            genresOutcome.map { genres ->
-                // We now have a list of genres, so we can fetch trending movies
-
-
-                MoviePage()
-            }
-        }
 
     // endregion Methods
 

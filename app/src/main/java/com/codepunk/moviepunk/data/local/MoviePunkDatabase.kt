@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.codepunk.moviepunk.data.local.dao.CrossRefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
@@ -32,6 +33,8 @@ abstract class MoviePunkDatabase : RoomDatabase() {
     abstract fun genreDao(): GenreDao
 
     abstract fun movieDao(): MovieDao
+
+    abstract fun crossRefDao(): CrossRefDao
 
     // endregion Methods
 

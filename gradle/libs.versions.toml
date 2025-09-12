@@ -30,6 +30,7 @@ hiltNavigationCompose = "1.3.0"
 javapoet = "1.13.0"
 lifecycle = "2.9.3"
 navigation = "2.9.4"
+paging = "3.3.6"
 quiver = "1.0.2"
 retrofit = "3.0.0"
 room = "2.8.0"
@@ -97,6 +98,10 @@ lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", 
 
 # Compose integration with Navigation
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+# Paging
+paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
 # Retrofit
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }

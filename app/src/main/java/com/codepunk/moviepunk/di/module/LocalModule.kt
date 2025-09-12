@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.CrossRefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import dagger.Module
 import dagger.Provides
@@ -29,6 +30,10 @@ object LocalModule {
     @Provides
     @Singleton
     fun provideArtistDao(database: MoviePunkDatabase): GenreDao = database.genreDao()
+
+    @Provides
+    @Singleton
+    fun provideCrossRefDao(database: MoviePunkDatabase): CrossRefDao = database.crossRefDao()
 
     // endregion Methods
 
