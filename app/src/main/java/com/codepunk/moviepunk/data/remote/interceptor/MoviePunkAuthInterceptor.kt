@@ -5,9 +5,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
-class MoviePunkAuthInterceptor @Inject constructor(
-
-) : Interceptor {
+class MoviePunkAuthInterceptor @Inject constructor() : Interceptor {
 
     // region Overridden methods
 

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
+import kotlinx.coroutines.flow.Flow
 import kotlin.time.Instant
 
 @Dao
@@ -37,7 +38,7 @@ abstract class GenreDao {
     // TODO Should I make these return values into Flows?
 
     @Query("SELECT * FROM genre")
-    abstract suspend fun getGenres(): List<LocalGenre>
+    abstract fun getGenres(): Flow<List<LocalGenre>>
 
     @Query("SELECT * FROM genre WHERE is_movie_genre = 1")
     abstract suspend fun getMovieGenres(): List<LocalGenre>

@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import arrow.retrofit.adapter.either.EitherCallAdapterFactory
 import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.data.remote.interceptor.LanguageInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.MoviePunkAuthInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.NetworkConnectionInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.UserAgentInterceptor
@@ -38,12 +39,14 @@ class RemoteModule {
         cache: Cache,
         networkConnectionInterceptor: NetworkConnectionInterceptor,
         userAgentInterceptor: UserAgentInterceptor,
-        authInterceptor: MoviePunkAuthInterceptor
+        authInterceptor: MoviePunkAuthInterceptor,
+        languageInterceptor: LanguageInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
         .cache(cache)
         .addInterceptor(networkConnectionInterceptor)
         .addInterceptor(userAgentInterceptor)
         .addInterceptor(authInterceptor)
+        .addInterceptor(languageInterceptor)
         .build()
 
     @Singleton

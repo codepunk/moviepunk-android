@@ -1,14 +1,12 @@
 package com.codepunk.moviepunk.data.repository
 
-import android.content.Context
-import androidx.room.withTransaction
 import app.cash.quiver.Absent
 import app.cash.quiver.extensions.OutcomeOf
 import app.cash.quiver.failure
 import app.cash.quiver.present
 import arrow.core.Either
 import arrow.core.raise.either
-import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.BuildConfig.DATA_REFRESH_DURATION_MINUTES
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
@@ -19,29 +17,21 @@ import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.time.Clock
+import kotlin.time.Clock.System.now
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 class MoviePunkRepositoryImpl(
-    private val context: Context,
+    private val ioDispatcher: CoroutineDispatcher,
     private val db: MoviePunkDatabase,
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice
 ) : MoviePunkRepository {
-
-    // region Properties
-
-    private val language by lazy {
-        context.resources.configuration.locales[0].toLanguageTag()
-    }
-
-    // endregion Properties
 
     // region Methods
 
@@ -51,47 +41,44 @@ class MoviePunkRepositoryImpl(
         Instant.DISTANT_PAST
     }
 
-    private fun getLocalGenres(
-        emitCachedBeforeFetching: Boolean = true
-    ): Flow<OutcomeOf<List<LocalGenre>>> = flow {
-        val elapsed = Clock.System.now() - getNewestGenre()
-        if (elapsed > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes) {
+    /**
+     * This version uses [channelFlow] to emit cached data immediately
+     * and then update it if necessary. It relies on [GenreDao.getGenres] returning a
+     * [Flow]<[List]<[LocalGenre]>>.
+     */
+    private fun getLocalGenres(): Flow<OutcomeOf<List<LocalGenre>>> = channelFlow {
+        // Emit cached genres (and keep emitting as they are updated)
+        launch {
+            genreDao.getGenres()
+                .map { localGenres -> localGenres.present() }
+                .catch { e -> e.failure() }
+                .collect { send(it) }
+        }
+
+        // Check if cached genres need to be updated
+        val needsRefresh = now() - getNewestGenre() > DATA_REFRESH_DURATION_MINUTES.minutes
+        if (needsRefresh) {
             Timber.i(message = "Genre data is out of date, updating")
-
-            // Optionally emit cached (local) genres
-            if (emitCachedBeforeFetching) {
-                emit(genreDao.getGenres().present())
-            }
-
-            emit(Absent)
-
-            // Refresh genres from remote source
+            send(Absent)
             either {
                 try {
-                    // Fetch remote genres and convert to local
                     val localGenres = toLocalGenres(
-                        movieResult = webservice.fetchMovieGenres(language).toApiEither().bind(),
-                        tvResult = webservice.fetchTvGenres(language).toApiEither().bind()
+                        movieResult = webservice.fetchMovieGenres().toApiEither().bind(),
+                        tvResult = webservice.fetchTvGenres().toApiEither().bind()
                     )
-
-                    // Cache fetched genres to local db
-                    db.withTransaction {
-                        genreDao.clearGenres()
-                        genreDao.insertGenres(localGenres)
-                    }
+                    // TODO Clean up any genres that are no longer used??
+                    genreDao.insertGenres(localGenres)
                 } catch (e: Exception) {
                     raise(e)
                 }
             }.onLeft { e ->
                 // Emit any errors encountered during refresh
-                emit(e.failure())
+                send(e.failure())
             }
+        } else {
+            Timber.i(message = "Genre data is up to date")
         }
-
-        // Finally, emit cached (local) genres
-        Timber.i(message = "Genre data is up to date")
-        emit(genreDao.getGenres().present())
-    }
+    }.flowOn(ioDispatcher)
 
     override suspend fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
         getLocalGenres().map { outcome ->

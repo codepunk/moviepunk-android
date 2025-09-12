@@ -16,14 +16,10 @@ interface MoviePunkWebservice {
     // ====================
 
     @GET("genre/movie/list")
-    suspend fun fetchMovieGenres(
-        @Query("language") language: String = "en-US", // TODO Clear all of these "en-us" references
-    ): Response<RemoteGenreListResult>
+    suspend fun fetchMovieGenres(): Response<RemoteGenreListResult>
 
     @GET("genre/tv/list")
-    suspend fun fetchTvGenres(
-        @Query("language") language: String = "en-US",
-    ): Response<RemoteGenreListResult>
+    suspend fun fetchTvGenres(): Response<RemoteGenreListResult>
 
     // ====================
     // Trending
@@ -32,8 +28,7 @@ interface MoviePunkWebservice {
     @GET("trending/movie/{time_window}")
     suspend fun fetchTrendingMovies(
         @Path("time_window") timeWindow: String = "day",
-        @Query("page") page: Int = 1,
-        @Query("language") language: String = "en-US",
+        @Query("page") page: Int = 1
     ): Response<RemoteMoviePage>
 
     // endregion Methods

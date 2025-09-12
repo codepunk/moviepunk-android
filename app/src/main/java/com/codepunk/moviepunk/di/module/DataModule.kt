@@ -1,15 +1,15 @@
 package com.codepunk.moviepunk.di.module
 
-import android.content.Context
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
+import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -21,7 +21,7 @@ class DataModule {
     @Singleton
     @Provides
     fun provideMoviePunkRepository(
-        @ApplicationContext context: Context,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
         db: MoviePunkDatabase,
         /* TODO
         connectivityManager: ConnectivityManager,
@@ -32,7 +32,7 @@ class DataModule {
         activityFeedRemoteMediatorFactory: ActivityFeedRemoteMediatorFactory
          */
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
-        context = context,
+        ioDispatcher = ioDispatcher,
         db = db,
         genreDao = db.genreDao(),
         movieDao = db.movieDao(),

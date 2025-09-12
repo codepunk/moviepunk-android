@@ -44,19 +44,19 @@ class HomeViewModel @Inject constructor(
 
     fun getGenres() {
         viewModelScope.launch(context = ioDispatcher) {
-            repository.getGenres().collect { result ->
-                Timber.d(message = "Genres: $result")
+            repository.getGenres().collect { outcome ->
+                Timber.d(message = "Genres outcome: $outcome")
 
-                /* If result.left has a value, use that
+                /* If outcome.left has a value, use that
                  * else if right has a value, null
                  * else use existing value
                  */
                 state = state.copy(
-                    genresLoading = result.isAbsent(),
-                    genres = result.getOrElse { state.genres },
+                    genresLoading = outcome.isAbsent(),
+                    genres = outcome.getOrElse { state.genres },
                     genresError = when {
-                        result.isFailure() -> result.inner.leftOrNull()
-                        result.isPresent() -> null
+                        outcome.isFailure() -> outcome.inner.leftOrNull()
+                        outcome.isPresent() -> null
                         else -> state.genresError
                     }
                 )
