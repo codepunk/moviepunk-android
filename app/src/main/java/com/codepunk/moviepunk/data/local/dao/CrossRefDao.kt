@@ -15,7 +15,7 @@ interface CrossRefDao {
     // ====================
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMoveGenreCrossRefs(crossRefs: List<LocalMovieGenreCrossRef>)
+    suspend fun insertAll(crossRefs: List<LocalMovieGenreCrossRef>)
 
     // endregion Methods
 

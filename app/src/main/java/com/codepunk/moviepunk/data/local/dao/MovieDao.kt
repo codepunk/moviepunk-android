@@ -1,10 +1,6 @@
 package com.codepunk.moviepunk.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Transaction
+import androidx.room.*
 import com.codepunk.moviepunk.data.local.entity.LocalMovie
 import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
 
@@ -18,10 +14,10 @@ abstract class MovieDao {
     // ====================
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertMovie(movie: LocalMovie): Long
+    abstract suspend fun insert(movie: LocalMovie): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertMovies(movies: List<LocalMovie>): List<Long>
+    abstract suspend fun insertAll(movies: List<LocalMovie>): List<Long>
 
     // ====================
     // Query
@@ -38,8 +34,12 @@ abstract class MovieDao {
     abstract suspend fun getMovieWithGenresById(id: Long): LocalMovieWithGenres?
 
     @Transaction
-    @Query("Select * FROM movie WHERE id IN (:ids)")
+    @Query("SELECT * FROM movie WHERE id IN (:ids)")
     abstract suspend fun getMoviesWithGenresByIds(ids: List<Long>): List<LocalMovieWithGenres>
+
+    // ====================
+    // Delete
+    // ====================
 
     // endregion Methods
 

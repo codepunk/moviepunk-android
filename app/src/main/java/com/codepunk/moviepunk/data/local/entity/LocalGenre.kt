@@ -12,7 +12,7 @@ data class LocalGenre constructor(
     @PrimaryKey(autoGenerate = false)
     val id: Int,
 
-    val name: String,
+    val name: String = "",
 
     @ColumnInfo(name = "is_movie_genre")
     val isMovieGenre: Boolean,

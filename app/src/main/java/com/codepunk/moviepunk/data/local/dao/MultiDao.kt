@@ -2,7 +2,7 @@ package com.codepunk.moviepunk.data.local.dao
 
 import androidx.room.Transaction
 import com.codepunk.moviepunk.data.local.entity.LocalMovieGenreCrossRef
-import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenreIds
+import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
 import javax.inject.Inject
 
 class MultiDao @Inject constructor(
@@ -21,27 +21,27 @@ class MultiDao @Inject constructor(
     //  genres arent in sync. Maybe handle that in repository?
 
     @Transaction
-    suspend fun insertMovie(movieWithGenreIds: LocalMovieWithGenreIds) {
-        val movieId = movieDao.insertMovie(movieWithGenreIds.movie)
-        crossRefDao.insertMoveGenreCrossRefs(
-            movieWithGenreIds.genreIds.map { genreId ->
+    suspend fun insert(movieWithGenres: LocalMovieWithGenres) {
+        val movieId = movieDao.insert(movieWithGenres.movie)
+        crossRefDao.insertAll(
+            movieWithGenres.genres.map { genre ->
                 LocalMovieGenreCrossRef(
                     movieId = movieId,
-                    genreId = genreId
+                    genreId = genre.id
                 )
             }
         )
     }
 
     @Transaction
-    suspend fun insertMovies(moviesWithGenreIds: List<LocalMovieWithGenreIds>) {
-        movieDao.insertMovies(moviesWithGenreIds.map { it.movie })
-        crossRefDao.insertMoveGenreCrossRefs(
-            moviesWithGenreIds.flatMap { movieWithGenreIds ->
-                movieWithGenreIds.genreIds.map { genreId ->
+    suspend fun insertAll(moviesWithGenres: List<LocalMovieWithGenres>) {
+        movieDao.insertAll(moviesWithGenres.map { it.movie })
+        crossRefDao.insertAll(
+            moviesWithGenres.flatMap { movieWithGenreIds ->
+                movieWithGenreIds.genres.map { genre ->
                     LocalMovieGenreCrossRef(
                         movieId = movieWithGenreIds.movie.id,
-                        genreId = genreId
+                        genreId = genre.id
                     )
                 }
             }

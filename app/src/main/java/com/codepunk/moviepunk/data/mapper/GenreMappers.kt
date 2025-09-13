@@ -12,7 +12,7 @@ import kotlin.time.Clock
 // Remote to local
 // ====================
 
-fun RemoteGenre.toLocalGenre(
+fun RemoteGenre.toLocal(
     isMovieGenre: Boolean,
     isTvGenre: Boolean
 ) = Clock.System.now().let { now ->
@@ -26,7 +26,7 @@ fun RemoteGenre.toLocalGenre(
     )
 }
 
-fun toLocalGenres(
+fun combineToLocal(
     movieResult: RemoteGenreListResult,
     tvResult: RemoteGenreListResult
 ): List<LocalGenre> {
@@ -34,7 +34,7 @@ fun toLocalGenres(
     val tvGenreIds = tvResult.genres.map { it.id }.toSet()
     val allRemoteGenres = (movieResult.genres + tvResult.genres).distinctBy { it.id }
     return allRemoteGenres.map { remoteGenre ->
-        remoteGenre.toLocalGenre(
+        remoteGenre.toLocal(
             isMovieGenre = movieGenreIds.contains(remoteGenre.id),
             isTvGenre = tvGenreIds.contains(remoteGenre.id)
         )
@@ -46,7 +46,7 @@ fun toLocalGenres(
 // ====================
 
 @Suppress("unused")
-fun LocalGenre.toGenre() = Genre(
+fun LocalGenre.toDomain() = Genre(
     id = id,
     name = name
 )

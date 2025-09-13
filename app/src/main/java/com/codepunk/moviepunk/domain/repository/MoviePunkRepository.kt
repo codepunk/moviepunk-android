@@ -8,11 +8,11 @@ interface MoviePunkRepository {
 
     // region Methods
 
-    suspend fun getGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getGenres(): Flow<OutcomeOf<List<Genre>>>
 
-    suspend fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>>
 
-    suspend fun getTvGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getTvGenres(): Flow<OutcomeOf<List<Genre>>>
 
     // endregion Methods
 

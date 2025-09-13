@@ -30,11 +30,11 @@ abstract class MoviePunkDatabase : RoomDatabase() {
 
     // region Methods
 
+    abstract fun crossRefDao(): CrossRefDao
+
     abstract fun genreDao(): GenreDao
 
     abstract fun movieDao(): MovieDao
-
-    abstract fun crossRefDao(): CrossRefDao
 
     // endregion Methods
 

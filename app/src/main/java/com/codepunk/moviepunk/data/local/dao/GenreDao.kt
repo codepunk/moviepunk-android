@@ -18,7 +18,7 @@ abstract class GenreDao {
     // ====================
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertGenres(genres: List<LocalGenre>)
+    abstract suspend fun insertAll(genres: List<LocalGenre>)
 
     // ====================
     // Delete

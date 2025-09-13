@@ -13,5 +13,5 @@ data class RemoteMoviePage(
     val totalPages: Int = 0,
 
     @SerialName(value = "total_results")
-    val totalResults: Int = 0
+    val totalResults: Long = 0
 )

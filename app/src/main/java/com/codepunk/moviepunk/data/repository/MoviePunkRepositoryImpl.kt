@@ -10,8 +10,8 @@ import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.mapper.toGenre
-import com.codepunk.moviepunk.data.mapper.toLocalGenres
+import com.codepunk.moviepunk.data.mapper.combineToLocal
+import com.codepunk.moviepunk.data.mapper.toDomain
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.Genre
@@ -29,8 +29,12 @@ class MoviePunkRepositoryImpl(
     private val db: MoviePunkDatabase,
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
-    private val webservice: MoviePunkWebservice
+    private val webservice: MoviePunkWebservice,
 ) : MoviePunkRepository {
+
+    // region Properties
+
+    // endregion Properties
 
     // region Methods
 
@@ -61,12 +65,12 @@ class MoviePunkRepositoryImpl(
             send(Absent)
             either {
                 try {
-                    val localGenres = toLocalGenres(
+                    val localGenres = combineToLocal(
                         movieResult = webservice.fetchMovieGenres().toApiEither().bind(),
                         tvResult = webservice.fetchTvGenres().toApiEither().bind()
                     )
                     // TODO Clean up any genres that are no longer used??
-                    genreDao.insertGenres(localGenres)
+                    genreDao.insertAll(localGenres)
                 } catch (e: Exception) {
                     raise(e)
                 }
@@ -79,18 +83,18 @@ class MoviePunkRepositoryImpl(
         }
     }.flowOn(ioDispatcher)
 
-    override suspend fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
+    override fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
         getLocalGenres().map { outcome ->
             outcome.map { localGenres ->
-                localGenres.map { it.toGenre() }
+                localGenres.map { it.toDomain() }
             }
         }
 
-    override suspend fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
+    override fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
         emit(Absent)
     }.flowOn(ioDispatcher)
 
-    override suspend fun getTvGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
+    override fun getTvGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
         emit(Absent)
     }.flowOn(ioDispatcher)
 

@@ -27,10 +27,7 @@ class DataModule {
         connectivityManager: ConnectivityManager,
         dataStore: DataStore<UserSettings>,
          */
-        webservice: MoviePunkWebservice
-        /* TODO ,
-        activityFeedRemoteMediatorFactory: ActivityFeedRemoteMediatorFactory
-         */
+        webservice: MoviePunkWebservice,
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
         db = db,
@@ -41,9 +38,6 @@ class DataModule {
         dataStore = dataStore,
          */
         webservice = webservice,
-        /*
-        activityFeedRemoteMediatorFactory = activityFeedRemoteMediatorFactory
-         */
     )
 
     // endregion Methods
