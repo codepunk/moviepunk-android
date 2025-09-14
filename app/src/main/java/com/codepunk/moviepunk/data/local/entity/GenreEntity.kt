@@ -7,7 +7,7 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Entity(tableName = "genre")
-data class LocalGenre constructor(
+data class GenreEntity constructor(
 
     @PrimaryKey(autoGenerate = false)
     val id: Int,

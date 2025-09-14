@@ -1,13 +1,13 @@
-package com.codepunk.moviepunk.data.remote.entity
+package com.codepunk.moviepunk.data.remote.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RemoteMoviePage(
+data class MoviePageResponse(
     val page: Int = 0,
 
-    val results: List<RemoteMovie> = emptyList(),
+    val results: List<MovieResponse> = emptyList(),
 
     @SerialName(value = "total_pages")
     val totalPages: Int = 0,

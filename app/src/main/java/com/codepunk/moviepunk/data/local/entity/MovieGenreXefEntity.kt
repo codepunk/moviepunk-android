@@ -6,7 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    tableName = "movie_genre_cross_ref",
+    tableName = "movie_genre_xref",
     primaryKeys = ["movie_id", "genre_id"],
     indices = [
         Index("movie_id"),
@@ -14,14 +14,14 @@ import androidx.room.Index
     ],
     foreignKeys = [
         ForeignKey(
-            entity = LocalMovie::class,
+            entity = MovieEntity::class,
             parentColumns = ["id"],
             childColumns = ["movie_id"],
             onDelete = ForeignKey.Companion.CASCADE,
             onUpdate = ForeignKey.Companion.CASCADE
         ),
         ForeignKey(
-            entity = LocalGenre::class,
+            entity = GenreEntity::class,
             parentColumns = ["id"],
             childColumns = ["genre_id"],
             onDelete = ForeignKey.Companion.CASCADE,
@@ -29,7 +29,7 @@ import androidx.room.Index
         )
     ]
 )
-data class LocalMovieGenreCrossRef(
+data class MovieGenreXefEntity(
     @ColumnInfo(name = "movie_id")
     val movieId: Long,
     @ColumnInfo(name = "genre_id")

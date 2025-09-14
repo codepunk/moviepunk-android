@@ -1,14 +1,14 @@
 package com.codepunk.moviepunk.data.local.dao
 
 import androidx.room.Transaction
-import com.codepunk.moviepunk.data.local.entity.LocalMovieGenreCrossRef
-import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
+import com.codepunk.moviepunk.data.local.entity.MovieGenreXefEntity
+import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
 import javax.inject.Inject
 
 class MultiDao @Inject constructor(
     val genreDao: GenreDao,
     val movieDao: MovieDao,
-    val crossRefDao: CrossRefDao
+    val movieGenreXrefDao: MovieGenreXrefDao
 ) {
 
     // region Methods
@@ -21,11 +21,11 @@ class MultiDao @Inject constructor(
     //  genres arent in sync. Maybe handle that in repository?
 
     @Transaction
-    suspend fun insert(movieWithGenres: LocalMovieWithGenres) {
+    suspend fun insert(movieWithGenres: MovieWithGenres) {
         val movieId = movieDao.insert(movieWithGenres.movie)
-        crossRefDao.insertAll(
+        movieGenreXrefDao.insertAll(
             movieWithGenres.genres.map { genre ->
-                LocalMovieGenreCrossRef(
+                MovieGenreXefEntity(
                     movieId = movieId,
                     genreId = genre.id
                 )
@@ -34,12 +34,12 @@ class MultiDao @Inject constructor(
     }
 
     @Transaction
-    suspend fun insertAll(moviesWithGenres: List<LocalMovieWithGenres>) {
+    suspend fun insertAll(moviesWithGenres: List<MovieWithGenres>) {
         movieDao.insertAll(moviesWithGenres.map { it.movie })
-        crossRefDao.insertAll(
+        movieGenreXrefDao.insertAll(
             moviesWithGenres.flatMap { movieWithGenreIds ->
                 movieWithGenreIds.genres.map { genre ->
-                    LocalMovieGenreCrossRef(
+                    MovieGenreXefEntity(
                         movieId = movieWithGenreIds.movie.id,
                         genreId = genre.id
                     )

@@ -5,22 +5,24 @@ import app.cash.quiver.extensions.OutcomeOf
 import app.cash.quiver.failure
 import app.cash.quiver.present
 import arrow.core.raise.either
-import com.codepunk.moviepunk.BuildConfig.DATA_REFRESH_DURATION_MINUTES
+import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
-import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.mapper.combineToLocal
+import com.codepunk.moviepunk.data.local.entity.GenreEntity
+import com.codepunk.moviepunk.data.mapper.combineToEntity
 import com.codepunk.moviepunk.data.mapper.toDomain
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
+import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.time.Clock.System.now
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
@@ -47,9 +49,9 @@ class MoviePunkRepositoryImpl(
     /**
      * This version uses [channelFlow] to emit cached data immediately
      * and then update it if necessary. It relies on [GenreDao.getGenres] returning a
-     * [Flow]<[List]<[LocalGenre]>>.
+     * [Flow]<[List]<[GenreEntity]>>.
      */
-    private fun getLocalGenres(): Flow<OutcomeOf<List<LocalGenre>>> = channelFlow {
+    private fun getLocalGenres(): Flow<OutcomeOf<List<GenreEntity>>> = channelFlow {
         // Emit cached genres (and keep emitting as they are updated)
         launch {
             genreDao.getGenres()
@@ -59,23 +61,39 @@ class MoviePunkRepositoryImpl(
         }
 
         // Check if cached genres need to be updated
-        val needsRefresh = now() - getNewestGenre() > DATA_REFRESH_DURATION_MINUTES.minutes
+        val duration = BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
+        val needsRefresh = Clock.System.now() - getNewestGenre() > duration
         if (needsRefresh) {
             Timber.i(message = "Genre data is out of date, updating")
             send(Absent)
             either {
-                try {
-                    val localGenres = combineToLocal(
-                        movieResult = webservice.fetchMovieGenres().toApiEither().bind(),
-                        tvResult = webservice.fetchTvGenres().toApiEither().bind()
+                // bind() will raise any non-CancellationException from toApiEither()
+                val movieGenreResponse =
+                    webservice.fetchGenres(EntityType.MOVIE).toApiEither().bind()
+                val tvGenreResponse =
+                    webservice.fetchGenres(EntityType.TV).toApiEither().bind()
+
+                // Catch any exceptions while respecting cancellation
+                val genreEntities = try {
+                    combineToEntity(
+                        movieGenreResponse = movieGenreResponse,
+                        tvGenreResponse = tvGenreResponse
                     )
-                    // TODO Clean up any genres that are no longer used??
-                    genreDao.insertAll(localGenres)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    raise(e)
+                }
+
+                try {
+                    genreDao.insertAll(genreEntities)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     raise(e)
                 }
             }.onLeft { e ->
-                // Emit any errors encountered during refresh
+                // This will now only receive non-CancellationExceptions
                 send(e.failure())
             }
         } else {

@@ -3,11 +3,14 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import arrow.retrofit.adapter.either.EitherCallAdapterFactory
 import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.data.remote.converter.EnumConverterFactory
 import com.codepunk.moviepunk.data.remote.interceptor.LanguageInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.MoviePunkAuthInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.NetworkConnectionInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.UserAgentInterceptor
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
+import com.codepunk.moviepunk.di.qualifier.EnumConverter
+import com.codepunk.moviepunk.di.qualifier.JsonConverter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,21 +68,29 @@ class RemoteModule {
         EitherCallAdapterFactory.create()
 
     @Singleton
+    @JsonConverter
     @Provides
-    fun provideConverterFactory(networkJson: Json): Converter.Factory =
+    fun provideJsonConverterFactory(networkJson: Json): Converter.Factory =
         networkJson.asConverterFactory("application/json".toMediaType())
+
+    @Singleton
+    @EnumConverter
+    @Provides
+    fun provideEnumConverterFactory(): Converter.Factory = EnumConverterFactory()
 
     @Singleton
     @Provides
     fun provideRetrofit(
         client: OkHttpClient,
         eitherCallAdapterFactory: EitherCallAdapterFactory,
-        converterFactory: Converter.Factory
+        @JsonConverter jsonConverterFactory: Converter.Factory,
+        @EnumConverter enumConverterFactory: Converter.Factory
     ): Retrofit = Retrofit.Builder()
         .client(client)
         .baseUrl(BuildConfig.BASE_URL)
         .addCallAdapterFactory(eitherCallAdapterFactory)
-        .addConverterFactory(converterFactory)
+        .addConverterFactory(jsonConverterFactory)
+        .addConverterFactory(enumConverterFactory)
         .build()
 
     @Singleton

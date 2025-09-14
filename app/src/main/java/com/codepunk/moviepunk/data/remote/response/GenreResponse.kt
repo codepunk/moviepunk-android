@@ -1,9 +1,9 @@
-package com.codepunk.moviepunk.data.remote.entity
+package com.codepunk.moviepunk.data.remote.response
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RemoteGenre(
+data class GenreResponse(
     val id: Int = 0,
     val name: String = ""
 )

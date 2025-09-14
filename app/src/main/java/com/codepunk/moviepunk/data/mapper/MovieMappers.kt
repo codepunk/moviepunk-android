@@ -1,12 +1,11 @@
 package com.codepunk.moviepunk.data.mapper
 
-import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.local.entity.LocalMovie
-import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
-import com.codepunk.moviepunk.data.remote.entity.RemoteMovie
+import com.codepunk.moviepunk.data.local.entity.MovieEntity
+import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
+import com.codepunk.moviepunk.data.remote.response.MovieResponse
 import com.codepunk.moviepunk.domain.model.Movie
 
-fun RemoteMovie.toLocal(): LocalMovie = LocalMovie(
+fun MovieResponse.toEntity(): MovieEntity = MovieEntity(
     id = id,
     adult = adult,
     backdropPath = backdropPath,
@@ -23,18 +22,12 @@ fun RemoteMovie.toLocal(): LocalMovie = LocalMovie(
     voteCount = voteCount
 )
 
-fun RemoteMovie.toLocalWithGenres(): LocalMovieWithGenres = LocalMovieWithGenres(
-    movie = toLocal(),
-    genreIds.map { genreId ->
-        LocalGenre(
-            id = genreId,
-            isMovieGenre = true,
-            isTvGenre = false
-        )
-    }
+fun MovieResponse.toRelation(): MovieWithGenres = MovieWithGenres(
+    movie = toEntity(),
+    genres = genreIds.map { id -> id.toEntity(isMovieGenre = true) }
 )
 
-fun LocalMovieWithGenres.toDomain(): Movie = Movie(
+fun MovieWithGenres.toDomain(): Movie = Movie(
     id = movie.id,
     adult = movie.adult,
     backdropPath = movie.backdropPath,

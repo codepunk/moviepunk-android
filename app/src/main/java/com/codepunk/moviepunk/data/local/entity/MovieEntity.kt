@@ -10,7 +10,7 @@ import kotlin.time.Instant
 @Entity(
     tableName = "movie"
 )
-data class LocalMovie(
+data class MovieEntity(
     @PrimaryKey
     val id: Long = 0,
 

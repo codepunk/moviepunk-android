@@ -1,8 +1,8 @@
 package com.codepunk.moviepunk.data.local.dao
 
 import androidx.room.*
-import com.codepunk.moviepunk.data.local.entity.LocalMovie
-import com.codepunk.moviepunk.data.local.relation.LocalMovieWithGenres
+import com.codepunk.moviepunk.data.local.entity.MovieEntity
+import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
 
 @Dao
 abstract class MovieDao {
@@ -14,28 +14,28 @@ abstract class MovieDao {
     // ====================
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insert(movie: LocalMovie): Long
+    abstract suspend fun insert(movie: MovieEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertAll(movies: List<LocalMovie>): List<Long>
+    abstract suspend fun insertAll(movies: List<MovieEntity>): List<Long>
 
     // ====================
     // Query
     // ====================
 
     @Query("SELECT * FROM movie WHERE id = :id")
-    abstract suspend fun getMovieById(id: Long): LocalMovie?
+    abstract suspend fun getMovieById(id: Long): MovieEntity?
 
     @Query("Select * FROM movie WHERE id IN (:ids)")
-    abstract suspend fun getMoviesByIds(ids: List<Long>): List<LocalMovie>
+    abstract suspend fun getMoviesByIds(ids: List<Long>): List<MovieEntity>
 
     @Transaction
     @Query("SELECT * FROM movie WHERE id = :id")
-    abstract suspend fun getMovieWithGenresById(id: Long): LocalMovieWithGenres?
+    abstract suspend fun getMovieWithGenresById(id: Long): MovieWithGenres?
 
     @Transaction
     @Query("SELECT * FROM movie WHERE id IN (:ids)")
-    abstract suspend fun getMoviesWithGenresByIds(ids: List<Long>): List<LocalMovieWithGenres>
+    abstract suspend fun getMoviesWithGenresByIds(ids: List<Long>): List<MovieWithGenres>
 
     // ====================
     // Delete

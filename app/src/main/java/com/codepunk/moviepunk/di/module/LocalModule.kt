@@ -3,7 +3,7 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
-import com.codepunk.moviepunk.data.local.dao.CrossRefDao
+import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import dagger.Module
 import dagger.Provides
@@ -33,7 +33,7 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideCrossRefDao(database: MoviePunkDatabase): CrossRefDao = database.crossRefDao()
+    fun provideCrossRefDao(database: MoviePunkDatabase): MovieGenreXrefDao = database.crossRefDao()
 
     // endregion Methods
 

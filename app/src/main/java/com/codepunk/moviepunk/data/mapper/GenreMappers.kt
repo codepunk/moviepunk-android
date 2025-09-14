@@ -1,22 +1,22 @@
 package com.codepunk.moviepunk.data.mapper
 
-import com.codepunk.moviepunk.data.local.entity.LocalGenre
-import com.codepunk.moviepunk.data.remote.entity.RemoteGenre
-import com.codepunk.moviepunk.data.remote.entity.RemoteGenreListResult
+import com.codepunk.moviepunk.data.local.entity.GenreEntity
+import com.codepunk.moviepunk.data.remote.response.GenreResponse
+import com.codepunk.moviepunk.data.remote.response.GenreListResponse
 import com.codepunk.moviepunk.domain.model.Genre
 import kotlin.time.Clock
 
 // region Methods
 
 // ====================
-// Remote to local
+// Response to entity
 // ====================
 
-fun RemoteGenre.toLocal(
+fun GenreResponse.toEntity(
     isMovieGenre: Boolean,
     isTvGenre: Boolean
 ) = Clock.System.now().let { now ->
-    LocalGenre(
+    GenreEntity(
         id = id,
         name = name,
         isMovieGenre = isMovieGenre,
@@ -26,15 +26,30 @@ fun RemoteGenre.toLocal(
     )
 }
 
-fun combineToLocal(
-    movieResult: RemoteGenreListResult,
-    tvResult: RemoteGenreListResult
-): List<LocalGenre> {
-    val movieGenreIds = movieResult.genres.map { it.id }.toSet()
-    val tvGenreIds = tvResult.genres.map { it.id }.toSet()
-    val allRemoteGenres = (movieResult.genres + tvResult.genres).distinctBy { it.id }
+/**
+ * Convenience method that converts a list of genre IDs to a list of [GenreEntity].
+ * As genre name will be empty, this is only used for inserting MovieWithGenres instances
+ * into the local database.
+ */
+fun Int.toEntity(
+    isMovieGenre: Boolean = false,
+    isTvGenre: Boolean = false
+) = GenreEntity(
+        id = this,
+        name = "",
+        isMovieGenre = isMovieGenre,
+        isTvGenre = isTvGenre
+    )
+
+fun combineToEntity(
+    movieGenreResponse: GenreListResponse,
+    tvGenreResponse: GenreListResponse
+): List<GenreEntity> {
+    val movieGenreIds = movieGenreResponse.genres.map { it.id }.toSet()
+    val tvGenreIds = tvGenreResponse.genres.map { it.id }.toSet()
+    val allRemoteGenres = (movieGenreResponse.genres + tvGenreResponse.genres).distinctBy { it.id }
     return allRemoteGenres.map { remoteGenre ->
-        remoteGenre.toLocal(
+        remoteGenre.toEntity(
             isMovieGenre = movieGenreIds.contains(remoteGenre.id),
             isTvGenre = tvGenreIds.contains(remoteGenre.id)
         )
@@ -42,11 +57,11 @@ fun combineToLocal(
 }
 
 // ====================
-// Local to domain
+// Entity to domain
 // ====================
 
 @Suppress("unused")
-fun LocalGenre.toDomain() = Genre(
+fun GenreEntity.toDomain() = Genre(
     id = id,
     name = name
 )
