@@ -9,7 +9,6 @@ import com.codepunk.moviepunk.data.remote.interceptor.MoviePunkAuthInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.NetworkConnectionInterceptor
 import com.codepunk.moviepunk.data.remote.interceptor.UserAgentInterceptor
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
-import com.codepunk.moviepunk.di.qualifier.EnumConverter
 import com.codepunk.moviepunk.di.qualifier.JsonConverter
 import dagger.Module
 import dagger.Provides
@@ -74,17 +73,12 @@ class RemoteModule {
         networkJson.asConverterFactory("application/json".toMediaType())
 
     @Singleton
-    @EnumConverter
-    @Provides
-    fun provideEnumConverterFactory(): Converter.Factory = EnumConverterFactory()
-
-    @Singleton
     @Provides
     fun provideRetrofit(
         client: OkHttpClient,
         eitherCallAdapterFactory: EitherCallAdapterFactory,
         @JsonConverter jsonConverterFactory: Converter.Factory,
-        @EnumConverter enumConverterFactory: Converter.Factory
+        enumConverterFactory: EnumConverterFactory
     ): Retrofit = Retrofit.Builder()
         .client(client)
         .baseUrl(BuildConfig.BASE_URL)

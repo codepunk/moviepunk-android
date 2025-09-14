@@ -4,8 +4,11 @@ import kotlinx.serialization.SerialName
 import retrofit2.Converter
 import retrofit2.Retrofit
 import java.lang.reflect.Type
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class EnumConverterFactory : Converter.Factory() {
+@Singleton
+class EnumConverterFactory @Inject constructor(): Converter.Factory() {
 
     override fun stringConverter(
         type: Type,
