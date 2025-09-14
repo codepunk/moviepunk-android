@@ -17,14 +17,6 @@ interface MoviePunkWebservice {
     // Genres
     // ====================
 
-    /*
-    @GET("genre/movie/list")
-    suspend fun fetchMovieGenres(): Response<GenreListResponse>
-
-    @GET("genre/tv/list")
-    suspend fun fetchTvGenres(): Response<GenreListResponse>
-     */
-
     @GET("genre/{entity_type}/list")
     suspend fun fetchGenres(
         @Path("entity_type") entityType: EntityType
