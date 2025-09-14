@@ -1,6 +1,7 @@
 package com.codepunk.moviepunk.di.module
 
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
@@ -28,9 +29,9 @@ class DataModule {
         dataStore: DataStore<UserSettings>,
          */
         webservice: MoviePunkWebservice,
+        trendingMovieRemoteMediatorFactory: TrendingMovieRemoteMediatorFactory
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
-        db = db,
         genreDao = db.genreDao(),
         movieDao = db.movieDao(),
         /* TODO
@@ -38,6 +39,7 @@ class DataModule {
         dataStore = dataStore,
          */
         webservice = webservice,
+        trendingMovieRemoteMediatorFactory = trendingMovieRemoteMediatorFactory
     )
 
     // endregion Methods

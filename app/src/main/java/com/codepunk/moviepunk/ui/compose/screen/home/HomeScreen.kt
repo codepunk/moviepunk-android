@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
 import timber.log.Timber
@@ -21,6 +23,12 @@ fun HomeScreen(
     onEvent: (HomeEvent) -> Unit
 ) {
     Timber.d(message = "state=$state")
+
+    val lazyTrendingMoviesPagingItems = state.trendingMoviesFlow.collectAsLazyPagingItems()
+
+    LaunchedEffect(lazyTrendingMoviesPagingItems) {
+        Timber.i("lazyTrendingMoviesPagingItems=$lazyTrendingMoviesPagingItems")
+    }
     
     Column(
         modifier = modifier.fillMaxSize(),

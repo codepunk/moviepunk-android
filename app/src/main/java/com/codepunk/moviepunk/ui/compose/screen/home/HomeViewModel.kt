@@ -2,8 +2,10 @@ package com.codepunk.moviepunk.ui.compose.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import app.cash.quiver.getOrElse
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
+import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -65,9 +67,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getTrendingMovies() {
-        viewModelScope.launch(context = ioDispatcher) {
-
-        }
+        val trendingMoviesFlow =
+            repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
+        state = state.copy(
+            trendingMoviesFlow = trendingMoviesFlow
+        )
     }
 
     // endregion Methods

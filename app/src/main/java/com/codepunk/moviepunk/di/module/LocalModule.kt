@@ -5,6 +5,9 @@ import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
+import com.codepunk.moviepunk.data.local.dao.MovieDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieRemoteKeyDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,11 +32,29 @@ object LocalModule {
 
     @Provides
     @Singleton
-    fun provideArtistDao(database: MoviePunkDatabase): GenreDao = database.genreDao()
+    fun provideGenreDao(database: MoviePunkDatabase): GenreDao = database.genreDao()
 
     @Provides
     @Singleton
-    fun provideCrossRefDao(database: MoviePunkDatabase): MovieGenreXrefDao = database.crossRefDao()
+    fun provideMovieDao(database: MoviePunkDatabase): MovieDao = database.movieDao()
+
+    @Provides
+    @Singleton
+    fun provideMovieGenreXrefDao(
+        database: MoviePunkDatabase
+    ): MovieGenreXrefDao = database.movieGenreXrefDao()
+
+    @Provides
+    @Singleton
+    fun provideTrendingMovieDao(
+        database: MoviePunkDatabase
+    ): TrendingMovieDao = database.trendingMovieDao()
+
+    @Provides
+    @Singleton
+    fun provideTrendingMovieRemoteKeyDao(
+        database: MoviePunkDatabase
+    ): TrendingMovieRemoteKeyDao = database.trendingMovieRemoteKeyDao()
 
     // endregion Methods
 

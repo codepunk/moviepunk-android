@@ -1,21 +1,29 @@
 package com.codepunk.moviepunk.data.repository
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import app.cash.quiver.Absent
 import app.cash.quiver.extensions.OutcomeOf
 import app.cash.quiver.failure
 import app.cash.quiver.present
 import arrow.core.raise.either
 import com.codepunk.moviepunk.BuildConfig
-import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.mapper.combineToEntity
 import com.codepunk.moviepunk.data.mapper.toDomain
+import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediator
+import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.Genre
+import com.codepunk.moviepunk.domain.model.Movie
+import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,13 +36,16 @@ import kotlin.time.Instant
 
 class MoviePunkRepositoryImpl(
     private val ioDispatcher: CoroutineDispatcher,
-    private val db: MoviePunkDatabase,
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
+    private val trendingMovieRemoteMediatorFactory: TrendingMovieRemoteMediatorFactory
 ) : MoviePunkRepository {
 
     // region Properties
+
+    private val trendingMovieRemoteMediators: MutableMap<TimeWindow, TrendingMovieRemoteMediator> =
+        mutableMapOf()
 
     // endregion Properties
 
@@ -115,6 +126,25 @@ class MoviePunkRepositoryImpl(
     override fun getTvGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
         emit(Absent)
     }.flowOn(ioDispatcher)
+
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
+        val remoteMediator = trendingMovieRemoteMediators.getOrPut(timeWindow) {
+            trendingMovieRemoteMediatorFactory.create(EntityType.MOVIE, timeWindow)
+        }
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false // Recommended when using RemoteMediator
+            ),
+            remoteMediator = remoteMediator,
+            pagingSourceFactory = {
+                movieDao.getTrendingMoviePagingSource()
+            }
+        ).flow.map { pagingData ->
+            pagingData.map { it.toDomain() }
+        }
+    }
 
     // endregion Methods
 

@@ -24,22 +24,22 @@ interface TrendingMovieRemoteKeyDao {
 
     // Query to get a specific key by item ID (useful for REFRESH anchor position)
     @Query("SELECT * FROM trending_movie_remote_key WHERE movie_id = :movieId")
-    suspend fun getRemoteKeyByItemId(movieId: Long): TrendingMovieRemoteKeyEntity?
+    suspend fun getByMovieId(movieId: Long): TrendingMovieRemoteKeyEntity?
 
     // Query to get the remote key for the *last* item loaded (useful for APPEND)
     @Query("SELECT * FROM trending_movie_remote_key ORDER BY created_at DESC LIMIT 1")
-    suspend fun getLastRemoteKey(): TrendingMovieRemoteKeyEntity?
+    suspend fun getLatest(): TrendingMovieRemoteKeyEntity?
 
     // Query to get the remote key for the *first* item loaded (useful for PREPEND)
     @Query("SELECT * FROM trending_movie_remote_key ORDER BY created_at ASC LIMIT 1")
-    suspend fun getFirstRemoteKey(): TrendingMovieRemoteKeyEntity?
+    suspend fun getEarliest(): TrendingMovieRemoteKeyEntity?
 
     // ====================
     // Delete
     // ====================
 
     @Query("DELETE FROM trending_movie_remote_key")
-    suspend fun clearRemoteKeys()
+    suspend fun clearAll()
 
     // endregion Methods
 

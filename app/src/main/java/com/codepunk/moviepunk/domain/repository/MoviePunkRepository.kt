@@ -1,7 +1,10 @@
 package com.codepunk.moviepunk.domain.repository
 
+import androidx.paging.PagingData
 import app.cash.quiver.extensions.OutcomeOf
 import com.codepunk.moviepunk.domain.model.Genre
+import com.codepunk.moviepunk.domain.model.Movie
+import com.codepunk.moviepunk.domain.model.TimeWindow
 import kotlinx.coroutines.flow.Flow
 
 interface MoviePunkRepository {
@@ -13,6 +16,8 @@ interface MoviePunkRepository {
     fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>>
 
     fun getTvGenres(): Flow<OutcomeOf<List<Genre>>>
+
+    fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>
 
     // endregion Methods
 
