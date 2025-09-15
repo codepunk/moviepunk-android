@@ -29,6 +29,7 @@ data class MovieResponse(
     @SerialName(value = "media_type")
     val mediaType: String = "",
 
+    @SerialName(value = "genre_ids")
     val genreIds: List<Int> = emptyList(),
 
     val popularity: Double = 0.0,

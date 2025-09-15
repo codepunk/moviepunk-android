@@ -17,6 +17,7 @@ import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.TimeWindow
+import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class TrendingMovieRemoteMediator(
@@ -35,42 +36,39 @@ class TrendingMovieRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, MovieWithGenres>
     ): MediatorResult {
-        try {
-            // Determine the page number to load
-            val page = when (loadType) {
-                LoadType.REFRESH -> {
-                    // Start paging fresh. Try to find a remote key near the anchor position.
-                    // If items loaded, find nearest key, otherwise default to 1
-                    val remoteKey = getRemoteKeyClosestToCurrentPosition(state)
-                    val nextKey = remoteKey?.nextKey
-                    nextKey?.minus(1) ?: 1
-                }
-                LoadType.PREPEND -> {
-                    // Prepending, load data before the first loaded page
-                    val remoteKey = getRemoteKeyForFirstItem(state)
-                    // If remoteKey is null, that means the data is empty, so we should terminate.
-                    // If prevKey is null, we've reached the beginning.
-                    remoteKey?.prevKey ?: return MediatorResult.Success(
-                        endOfPaginationReached = remoteKey != null
-                    )
-                }
-                LoadType.APPEND -> {
-                    // Appending, load data after the last loaded page
-                    val remoteKey = getRemoteKeyForLastItem(state)
-                    // If remoteKey is null, that means the data is empty, so we should terminate.
-                    // If nextKey is null, we've reached the end.
-                    remoteKey?.nextKey ?: return MediatorResult.Success(
-                        endOfPaginationReached = remoteKey != null
-                    )
-                }
+        // Determine the page number to load
+        val page = when (loadType) {
+            LoadType.REFRESH -> {
+                // Start paging fresh. Try to find a remote key near the anchor position.
+                // If items loaded, find nearest key, otherwise default to 1
+                val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+                val nextKey = remoteKeys?.nextKey
+                nextKey?.minus(1) ?: 1
             }
+            LoadType.PREPEND -> {
+                // Prepending, load data before the first loaded page
+                val remoteKeys = getRemoteKeyForFirstItem(state)
+                val prevKey = remoteKeys?.prevKey
+                // If remoteKeys is null, that means the data is empty, so we should terminate.
+                // If prevKey is null, we've reached the beginning.
+                prevKey
+                    ?: return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
+            }
+            LoadType.APPEND -> {
+                // Appending, load data after the last loaded page
+                val remoteKeys = getRemoteKeyForLastItem(state)
+                val nextKey = remoteKeys?.nextKey
+                Timber.i("load: state=$state, loadType=$loadType, remoteKeys=$remoteKeys, nextKey=$nextKey")
 
-            /* I don't think this is reachable
-            // If the calculated page is null (e.g., end reached on PREPEND/APPEND based on keys)
-            if (page == null && (loadType == LoadType.PREPEND || loadType == LoadType.APPEND)) {
-                return MediatorResult.Success(endOfPaginationReached = true)
+                // If remoteKeys is null, that means the data is empty, so we should terminate.
+                // If nextKey is null, we've reached the end.
+                nextKey
+                    ?: return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
             }
-             */
+        }
+
+        try {
+            Timber.i("load: About to fetch... page=$page")
 
             // Make the network request
             val movies = webservice.fetchTrendingMovies(
@@ -79,9 +77,7 @@ class TrendingMovieRemoteMediator(
                 page = page
             ).toApiEither().fold(
                 ifLeft = { return MediatorResult.Error(it) },
-                ifRight = { response ->
-                    response.results
-                }
+                ifRight = { response -> response.results }
             )
             val endOfPaginationReached = movies.isEmpty()
 
@@ -89,6 +85,7 @@ class TrendingMovieRemoteMediator(
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     // Clear existing data and keys
+                    Timber.i("loadType == REFRESH, clearing trending_movie & trending_movie_remote_key")
                     trendingMovieDao.clearAll()
                     trendingMovieRemoteKeyDao.clearAll()
                 }
@@ -125,6 +122,10 @@ class TrendingMovieRemoteMediator(
         }
     }
 
+    override suspend fun initialize(): InitializeAction {
+        return super.initialize()
+    }
+
     /**
      * Helper method to get the [TrendingMovieRemoteKeyEntity] closest to the anchor position
      * supplied by [state].
@@ -148,9 +149,10 @@ class TrendingMovieRemoteMediator(
     private suspend fun getRemoteKeyForLastItem(
         state: PagingState<Int, MovieWithGenres>
     ): TrendingMovieRemoteKeyEntity? {
-        val page = state.pages.lastOrNull { it.data.isNotEmpty() } ?: return null
-        val movieEntity = page.data.lastOrNull() ?: return null
-        return trendingMovieRemoteKeyDao.getByMovieId(movieEntity.movie.id)
+        val lastPage = state.pages.lastOrNull { it.data.isNotEmpty() } ?: return null
+        val lastMovieWithGenres = lastPage.data.lastOrNull() ?: return null
+        val remoteKey = trendingMovieRemoteKeyDao.getByMovieId(lastMovieWithGenres.movie.id)
+        return remoteKey
     }
 
     // endregion Methods

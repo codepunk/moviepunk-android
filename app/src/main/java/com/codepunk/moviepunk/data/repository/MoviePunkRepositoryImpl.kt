@@ -79,10 +79,20 @@ class MoviePunkRepositoryImpl(
             send(Absent)
             either {
                 // bind() will raise any non-CancellationException from toApiEither()
-                val movieGenreResponse =
+                val movieGenreResponse = try {
                     webservice.fetchGenres(EntityType.MOVIE).toApiEither().bind()
-                val tvGenreResponse =
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    raise(e)
+                }
+                val tvGenreResponse = try {
                     webservice.fetchGenres(EntityType.TV).toApiEither().bind()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    raise(e)
+                }
 
                 // Catch any exceptions while respecting cancellation
                 val genreEntities = try {
@@ -134,7 +144,7 @@ class MoviePunkRepositoryImpl(
         }
         return Pager(
             config = PagingConfig(
-                pageSize = 20,
+                pageSize = BuildConfig.TMDB_PAGE_SIZE,
                 enablePlaceholders = false // Recommended when using RemoteMediator
             ),
             remoteMediator = remoteMediator,

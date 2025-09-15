@@ -19,7 +19,9 @@ import kotlin.time.Instant
     ]
 )
 data class TrendingMovieEntity(
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey(autoGenerate = true)
+    val id: Long? = null,
+
     @ColumnInfo("movie_id")
     val movieId: Long = 0,
 
