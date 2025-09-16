@@ -17,6 +17,8 @@ class TrendingMovieRemoteMediatorFactory @Inject constructor(
     private val webservice: MoviePunkWebservice
 ) {
 
+    // region Methods
+
     fun create(
         entityType: EntityType = EntityType.MOVIE,
         timeWindow: TimeWindow = TimeWindow.DAY,
@@ -30,5 +32,7 @@ class TrendingMovieRemoteMediatorFactory @Inject constructor(
         webservice = webservice
 
     )
+
+    // endregion Methods
 
 }

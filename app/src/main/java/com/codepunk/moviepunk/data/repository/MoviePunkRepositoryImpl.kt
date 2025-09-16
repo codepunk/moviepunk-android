@@ -1,8 +1,5 @@
 package com.codepunk.moviepunk.data.repository
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import app.cash.quiver.Absent
@@ -15,10 +12,9 @@ import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.mapper.combineToGenreEntities
-import com.codepunk.moviepunk.data.mapper.toMovie
 import com.codepunk.moviepunk.data.mapper.toGenre
-import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediator
-import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
+import com.codepunk.moviepunk.data.mapper.toMovie
+import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
@@ -40,13 +36,15 @@ class MoviePunkRepositoryImpl(
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
-    private val trendingMovieRemoteMediatorFactory: TrendingMovieRemoteMediatorFactory
+    private val trendingMoviePagerFactory: TrendingMoviePagerFactory
 ) : MoviePunkRepository {
 
     // region Properties
 
+    /*
     private val trendingMovieRemoteMediators: MutableMap<TimeWindow, TrendingMovieRemoteMediator> =
         mutableMapOf()
+     */
 
     // endregion Properties
 
@@ -139,23 +137,12 @@ class MoviePunkRepositoryImpl(
         emit(Absent)
     }.flowOn(ioDispatcher)
 
-    @OptIn(ExperimentalPagingApi::class)
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
-        val remoteMediator = trendingMovieRemoteMediators.getOrPut(timeWindow) {
-            trendingMovieRemoteMediatorFactory.create(EntityType.MOVIE, timeWindow)
-        }
-        return Pager(
-            config = PagingConfig(
-                pageSize = BuildConfig.TMDB_PAGE_SIZE,
-                enablePlaceholders = false // Recommended when using RemoteMediator
-            ),
-            remoteMediator = remoteMediator,
-            pagingSourceFactory = {
-                movieDao.getTrendingMoviePagingSource()
+        // TODO Some way of caching this pager?
+        return trendingMoviePagerFactory.get(timeWindow)
+            .flow.map { pagingData ->
+                pagingData.map { it.toMovie() }
             }
-        ).flow.map { pagingData ->
-            pagingData.map { it.toMovie() }
-        }
     }
 
     // endregion Methods

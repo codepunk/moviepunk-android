@@ -17,7 +17,6 @@ import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.TimeWindow
-import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class TrendingMovieRemoteMediator(
@@ -58,7 +57,6 @@ class TrendingMovieRemoteMediator(
                 // Appending, load data after the last loaded page
                 val remoteKeys = getRemoteKeyForLastItem(state)
                 val nextKey = remoteKeys?.nextKey
-                Timber.i("load: state=$state, loadType=$loadType, remoteKeys=$remoteKeys, nextKey=$nextKey")
 
                 // If remoteKeys is null, that means the data is empty, so we should terminate.
                 // If nextKey is null, we've reached the end.
@@ -68,8 +66,6 @@ class TrendingMovieRemoteMediator(
         }
 
         try {
-            Timber.i("load: About to fetch... page=$page")
-
             // Make the network request
             val movies = webservice.fetchTrendingMovies(
                 entityType = entityType,
@@ -85,7 +81,6 @@ class TrendingMovieRemoteMediator(
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     // Clear existing data and keys
-                    Timber.i("loadType == REFRESH, clearing trending_movie & trending_movie_remote_key")
                     trendingMovieDao.clearAll()
                     trendingMovieRemoteKeyDao.clearAll()
                 }

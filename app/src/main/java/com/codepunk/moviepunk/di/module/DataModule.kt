@@ -1,7 +1,9 @@
 package com.codepunk.moviepunk.di.module
 
+import androidx.paging.PagingConfig
+import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
-import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
+import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
@@ -21,6 +23,13 @@ class DataModule {
 
     @Singleton
     @Provides
+    fun providePagingConfig(): PagingConfig = PagingConfig(
+        pageSize = BuildConfig.TMDB_PAGE_SIZE,
+        enablePlaceholders = false,
+    )
+
+    @Singleton
+    @Provides
     fun provideMoviePunkRepository(
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
         db: MoviePunkDatabase,
@@ -29,7 +38,7 @@ class DataModule {
         dataStore: DataStore<UserSettings>,
          */
         webservice: MoviePunkWebservice,
-        trendingMovieRemoteMediatorFactory: TrendingMovieRemoteMediatorFactory
+        trendingMoviePagerFactory: TrendingMoviePagerFactory
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
         genreDao = db.genreDao(),
@@ -39,7 +48,7 @@ class DataModule {
         dataStore = dataStore,
          */
         webservice = webservice,
-        trendingMovieRemoteMediatorFactory = trendingMovieRemoteMediatorFactory
+        trendingMoviePagerFactory = trendingMoviePagerFactory
     )
 
     // endregion Methods
