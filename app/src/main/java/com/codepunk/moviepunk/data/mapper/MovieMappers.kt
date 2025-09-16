@@ -2,10 +2,10 @@ package com.codepunk.moviepunk.data.mapper
 
 import com.codepunk.moviepunk.data.local.entity.MovieEntity
 import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
-import com.codepunk.moviepunk.data.remote.response.MovieResponse
+import com.codepunk.moviepunk.data.remote.dto.MovieDto
 import com.codepunk.moviepunk.domain.model.Movie
 
-fun MovieResponse.toEntity(): MovieEntity = MovieEntity(
+fun MovieDto.toEntity(): MovieEntity = MovieEntity(
     id = id,
     adult = adult,
     backdropPath = backdropPath,
@@ -22,12 +22,12 @@ fun MovieResponse.toEntity(): MovieEntity = MovieEntity(
     voteCount = voteCount
 )
 
-fun MovieResponse.toRelation(): MovieWithGenres = MovieWithGenres(
+fun MovieDto.toEntityWithDetails(): MovieWithGenres = MovieWithGenres(
     movie = toEntity(),
     genres = genreIds.map { id -> id.toEntity(isMovieGenre = true) }
 )
 
-fun MovieWithGenres.toDomain(): Movie = Movie(
+fun MovieWithGenres.toModel(): Movie = Movie(
     id = movie.id,
     adult = movie.adult,
     backdropPath = movie.backdropPath,
@@ -37,7 +37,7 @@ fun MovieWithGenres.toDomain(): Movie = Movie(
     overview = movie.overview,
     posterPath = movie.posterPath,
     mediaType = movie.mediaType,
-    genres = genres.map { it.toDomain() },
+    genres = genres.map { it.toModel() },
     popularity = movie.popularity,
     releaseDate = movie.releaseDate,
     video = movie.video,

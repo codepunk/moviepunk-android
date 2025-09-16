@@ -1,11 +1,11 @@
-package com.codepunk.moviepunk.data.remote.response
+package com.codepunk.moviepunk.data.remote.dto
 
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MovieResponse(
+data class MovieDto(
     val id: Long = 0,
 
     val adult: Boolean = false,

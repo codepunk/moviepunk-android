@@ -12,7 +12,7 @@ import com.codepunk.moviepunk.data.local.dao.TrendingMovieRemoteKeyDao
 import com.codepunk.moviepunk.data.local.entity.TrendingMovieEntity
 import com.codepunk.moviepunk.data.local.entity.TrendingMovieRemoteKeyEntity
 import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
-import com.codepunk.moviepunk.data.mapper.toRelation
+import com.codepunk.moviepunk.data.mapper.toEntityWithDetails
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
@@ -91,7 +91,7 @@ class TrendingMovieRemoteMediator(
                 }
 
                 // Map to movie relations
-                val moviesWithGenres = movies.map { it.toRelation() }
+                val moviesWithGenres = movies.map { it.toEntityWithDetails() }
 
                 // Map to trending movies
                 val trendingMovies = movies.map { movie ->

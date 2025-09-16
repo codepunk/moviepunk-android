@@ -15,7 +15,7 @@ import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.mapper.combineToEntity
-import com.codepunk.moviepunk.data.mapper.toDomain
+import com.codepunk.moviepunk.data.mapper.toModel
 import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediator
 import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
 import com.codepunk.moviepunk.data.remote.util.toApiEither
@@ -78,16 +78,17 @@ class MoviePunkRepositoryImpl(
             Timber.i(message = "Genre data is out of date, updating")
             send(Absent)
             either {
+                // TODO Do I need all of these separate try's? Can they be combined?
                 // bind() will raise any non-CancellationException from toApiEither()
-                val movieGenreResponse = try {
-                    webservice.fetchGenres(EntityType.MOVIE).toApiEither().bind()
+                val movieGenreDtos = try {
+                    webservice.fetchGenres(EntityType.MOVIE).toApiEither().bind().genres
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     raise(e)
                 }
-                val tvGenreResponse = try {
-                    webservice.fetchGenres(EntityType.TV).toApiEither().bind()
+                val tvGenreDtos = try {
+                    webservice.fetchGenres(EntityType.TV).toApiEither().bind().genres
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -97,8 +98,8 @@ class MoviePunkRepositoryImpl(
                 // Catch any exceptions while respecting cancellation
                 val genreEntities = try {
                     combineToEntity(
-                        movieGenreResponse = movieGenreResponse,
-                        tvGenreResponse = tvGenreResponse
+                        movieGenreDtos = movieGenreDtos,
+                        tvGenreDtos = tvGenreDtos
                     )
                 } catch (e: CancellationException) {
                     throw e
@@ -125,7 +126,7 @@ class MoviePunkRepositoryImpl(
     override fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
         getLocalGenres().map { outcome ->
             outcome.map { localGenres ->
-                localGenres.map { it.toDomain() }
+                localGenres.map { it.toModel() }
             }
         }
 
@@ -152,7 +153,7 @@ class MoviePunkRepositoryImpl(
                 movieDao.getTrendingMoviePagingSource()
             }
         ).flow.map { pagingData ->
-            pagingData.map { it.toDomain() }
+            pagingData.map { it.toModel() }
         }
     }
 

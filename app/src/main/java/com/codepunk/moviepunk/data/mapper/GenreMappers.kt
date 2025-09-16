@@ -1,8 +1,7 @@
 package com.codepunk.moviepunk.data.mapper
 
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
-import com.codepunk.moviepunk.data.remote.response.GenreResponse
-import com.codepunk.moviepunk.data.remote.response.GenreListResponse
+import com.codepunk.moviepunk.data.remote.dto.GenreDto
 import com.codepunk.moviepunk.domain.model.Genre
 import kotlin.time.Clock
 
@@ -12,7 +11,7 @@ import kotlin.time.Clock
 // Response to entity
 // ====================
 
-fun GenreResponse.toEntity(
+fun GenreDto.toEntity(
     isMovieGenre: Boolean,
     isTvGenre: Boolean
 ) = Clock.System.now().let { now ->
@@ -42,12 +41,12 @@ fun Int.toEntity(
     )
 
 fun combineToEntity(
-    movieGenreResponse: GenreListResponse,
-    tvGenreResponse: GenreListResponse
+    movieGenreDtos: List<GenreDto>,
+    tvGenreDtos: List<GenreDto>
 ): List<GenreEntity> {
-    val movieGenreIds = movieGenreResponse.genres.map { it.id }.toSet()
-    val tvGenreIds = tvGenreResponse.genres.map { it.id }.toSet()
-    val allRemoteGenres = (movieGenreResponse.genres + tvGenreResponse.genres).distinctBy { it.id }
+    val movieGenreIds = movieGenreDtos.map { it.id }.toSet()
+    val tvGenreIds = tvGenreDtos.map { it.id }.toSet()
+    val allRemoteGenres = (movieGenreDtos + tvGenreDtos).distinctBy { it.id }
     return allRemoteGenres.map { remoteGenre ->
         remoteGenre.toEntity(
             isMovieGenre = movieGenreIds.contains(remoteGenre.id),
@@ -61,7 +60,7 @@ fun combineToEntity(
 // ====================
 
 @Suppress("unused")
-fun GenreEntity.toDomain() = Genre(
+fun GenreEntity.toModel() = Genre(
     id = id,
     name = name
 )
