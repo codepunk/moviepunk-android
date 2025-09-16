@@ -14,8 +14,9 @@ import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
-import com.codepunk.moviepunk.data.mapper.combineToEntity
-import com.codepunk.moviepunk.data.mapper.toModel
+import com.codepunk.moviepunk.data.mapper.combineToGenreEntities
+import com.codepunk.moviepunk.data.mapper.toMovie
+import com.codepunk.moviepunk.data.mapper.toGenre
 import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediator
 import com.codepunk.moviepunk.data.paging.TrendingMovieRemoteMediatorFactory
 import com.codepunk.moviepunk.data.remote.util.toApiEither
@@ -97,7 +98,7 @@ class MoviePunkRepositoryImpl(
 
                 // Catch any exceptions while respecting cancellation
                 val genreEntities = try {
-                    combineToEntity(
+                    combineToGenreEntities(
                         movieGenreDtos = movieGenreDtos,
                         tvGenreDtos = tvGenreDtos
                     )
@@ -126,7 +127,7 @@ class MoviePunkRepositoryImpl(
     override fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
         getLocalGenres().map { outcome ->
             outcome.map { localGenres ->
-                localGenres.map { it.toModel() }
+                localGenres.map { it.toGenre() }
             }
         }
 
@@ -153,7 +154,7 @@ class MoviePunkRepositoryImpl(
                 movieDao.getTrendingMoviePagingSource()
             }
         ).flow.map { pagingData ->
-            pagingData.map { it.toModel() }
+            pagingData.map { it.toMovie() }
         }
     }
 

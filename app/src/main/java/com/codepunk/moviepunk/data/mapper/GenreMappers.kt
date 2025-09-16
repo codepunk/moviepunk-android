@@ -11,7 +11,7 @@ import kotlin.time.Clock
 // Response to entity
 // ====================
 
-fun GenreDto.toEntity(
+fun GenreDto.toGenreEntity(
     isMovieGenre: Boolean,
     isTvGenre: Boolean
 ) = Clock.System.now().let { now ->
@@ -30,7 +30,7 @@ fun GenreDto.toEntity(
  * As genre name will be empty, this is only used for inserting MovieWithGenres instances
  * into the local database.
  */
-fun Int.toEntity(
+fun Int.toGenreEntity(
     isMovieGenre: Boolean = false,
     isTvGenre: Boolean = false
 ) = GenreEntity(
@@ -40,7 +40,7 @@ fun Int.toEntity(
         isTvGenre = isTvGenre
     )
 
-fun combineToEntity(
+fun combineToGenreEntities(
     movieGenreDtos: List<GenreDto>,
     tvGenreDtos: List<GenreDto>
 ): List<GenreEntity> {
@@ -48,7 +48,7 @@ fun combineToEntity(
     val tvGenreIds = tvGenreDtos.map { it.id }.toSet()
     val allRemoteGenres = (movieGenreDtos + tvGenreDtos).distinctBy { it.id }
     return allRemoteGenres.map { remoteGenre ->
-        remoteGenre.toEntity(
+        remoteGenre.toGenreEntity(
             isMovieGenre = movieGenreIds.contains(remoteGenre.id),
             isTvGenre = tvGenreIds.contains(remoteGenre.id)
         )
@@ -60,7 +60,7 @@ fun combineToEntity(
 // ====================
 
 @Suppress("unused")
-fun GenreEntity.toModel() = Genre(
+fun GenreEntity.toGenre() = Genre(
     id = id,
     name = name
 )

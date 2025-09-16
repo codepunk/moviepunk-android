@@ -3,7 +3,7 @@ package com.codepunk.moviepunk.data.remote.util
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
-import com.codepunk.moviepunk.data.mapper.toModel
+import com.codepunk.moviepunk.data.mapper.toApiStatus
 import com.codepunk.moviepunk.data.remote.response.ApiStatusResponse
 import com.codepunk.moviepunk.util.exception.ApiException
 import com.codepunk.moviepunk.util.exception.HttpException
@@ -38,7 +38,7 @@ fun <R> Response<R>.toApiEither(
         try {
             ApiException(
                 httpStatus = httpStatus,
-                apiStatus = Json.decodeFromString<ApiStatusResponse>(errorBodyString).toModel()
+                apiStatus = Json.decodeFromString<ApiStatusResponse>(errorBodyString).toApiStatus()
             )
         } catch (e: Exception) {
             e

@@ -5,7 +5,7 @@ import com.codepunk.moviepunk.data.local.relation.MovieWithGenres
 import com.codepunk.moviepunk.data.remote.dto.MovieDto
 import com.codepunk.moviepunk.domain.model.Movie
 
-fun MovieDto.toEntity(): MovieEntity = MovieEntity(
+fun MovieDto.toMovieEntity(): MovieEntity = MovieEntity(
     id = id,
     adult = adult,
     backdropPath = backdropPath,
@@ -22,12 +22,12 @@ fun MovieDto.toEntity(): MovieEntity = MovieEntity(
     voteCount = voteCount
 )
 
-fun MovieDto.toEntityWithDetails(): MovieWithGenres = MovieWithGenres(
-    movie = toEntity(),
-    genres = genreIds.map { id -> id.toEntity(isMovieGenre = true) }
+fun MovieDto.toMovieWithGenres(): MovieWithGenres = MovieWithGenres(
+    movie = toMovieEntity(),
+    genres = genreIds.map { id -> id.toGenreEntity(isMovieGenre = true) }
 )
 
-fun MovieWithGenres.toModel(): Movie = Movie(
+fun MovieWithGenres.toMovie(): Movie = Movie(
     id = movie.id,
     adult = movie.adult,
     backdropPath = movie.backdropPath,
@@ -37,7 +37,7 @@ fun MovieWithGenres.toModel(): Movie = Movie(
     overview = movie.overview,
     posterPath = movie.posterPath,
     mediaType = movie.mediaType,
-    genres = genres.map { it.toModel() },
+    genres = genres.map { it.toGenre() },
     popularity = movie.popularity,
     releaseDate = movie.releaseDate,
     video = movie.video,
