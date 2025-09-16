@@ -141,8 +141,8 @@ class TrendingMovieRemoteMediator(
     private suspend fun getRemoteKeyForFirstItem(
         state: PagingState<Int, MovieWithGenres>
     ): TrendingMovieRemoteKeyEntity? {
-        val page = state.pages.firstOrNull { it.data.isNotEmpty() } ?: return null
-        val movieEntity = page.data.firstOrNull() ?: return null
+        val firstPage = state.pages.firstOrNull { it.data.isNotEmpty() } ?: return null
+        val movieEntity = firstPage.data.firstOrNull() ?: return null
         return trendingMovieRemoteKeyDao.getByMovieId(movieEntity.movie.id)
     }
 
@@ -151,8 +151,7 @@ class TrendingMovieRemoteMediator(
     ): TrendingMovieRemoteKeyEntity? {
         val lastPage = state.pages.lastOrNull { it.data.isNotEmpty() } ?: return null
         val lastMovieWithGenres = lastPage.data.lastOrNull() ?: return null
-        val remoteKey = trendingMovieRemoteKeyDao.getByMovieId(lastMovieWithGenres.movie.id)
-        return remoteKey
+        return trendingMovieRemoteKeyDao.getByMovieId(lastMovieWithGenres.movie.id)
     }
 
     // endregion Methods
