@@ -7,6 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.codepunk.moviepunk.ui.compose.screen.home.HomeScreen
 import com.codepunk.moviepunk.ui.compose.screen.home.HomeViewModel
 
@@ -24,8 +25,11 @@ fun Navigation(
         composable<Routes.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
             val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+            val trendingMoviesLazyPagingItems =
+                viewModel.trendingMoviesFlow.collectAsLazyPagingItems()
             HomeScreen(
                 state = state.value,
+                trendingMovies = trendingMoviesLazyPagingItems,
                 modifier = modifier
             ) { event ->
                 // Handle events here

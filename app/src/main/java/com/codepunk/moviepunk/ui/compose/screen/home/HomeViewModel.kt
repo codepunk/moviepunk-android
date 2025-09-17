@@ -2,15 +2,19 @@ package com.codepunk.moviepunk.ui.compose.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import app.cash.quiver.getOrElse
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
+import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -25,6 +29,9 @@ class HomeViewModel @Inject constructor(
 
     private val _stateFlow: MutableStateFlow<HomeState> = MutableStateFlow(HomeState())
     val stateFlow = _stateFlow.asStateFlow()
+
+    var trendingMoviesFlow: Flow<PagingData<Movie>> = flowOf(PagingData.empty())
+        private set
 
     @Suppress("unused")
     private var state: HomeState
@@ -67,11 +74,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getTrendingMovies() {
-        val trendingMoviesFlow =
-            repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
-        state = state.copy(
-            trendingMoviesFlow = trendingMoviesFlow
-        )
+        trendingMoviesFlow = repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
     }
 
     // endregion Methods

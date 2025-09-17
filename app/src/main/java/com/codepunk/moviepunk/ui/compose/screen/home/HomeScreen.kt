@@ -6,66 +6,40 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
-import timber.log.Timber
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun HomeScreen(
     state: HomeState,
+    trendingMovies: LazyPagingItems<Movie>,
     modifier: Modifier = Modifier,
     @Suppress("unused")
     onEvent: (HomeEvent) -> Unit
 ) {
-    Timber.d(message = "state=$state")
-
-    val lazyTrendingMoviesPagingItems = state.trendingMoviesFlow.collectAsLazyPagingItems()
-
-    LaunchedEffect(lazyTrendingMoviesPagingItems) {
-        Timber.i("lazyTrendingMoviesPagingItems=$lazyTrendingMoviesPagingItems")
-    }
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(
-            count = lazyTrendingMoviesPagingItems.itemCount,
-            key = lazyTrendingMoviesPagingItems.itemKey { it.id }
+            count = trendingMovies.itemCount,
+            key = trendingMovies.itemKey { it.id }
         ) { index ->
-            lazyTrendingMoviesPagingItems[index]?.also { movie ->
+            trendingMovies[index]?.also { movie ->
                 MovieCard(
                     movie = movie
                 )
             }
         }
     }
-
-    /*
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Home Screen"
-        )
-        if (state.genresLoading) {
-            Text(text = "Genres loading...")
-        }
-        state.genresError?.apply {
-            Text(text = "Genre error: ${this::class.java.simpleName} | ${this.message}")
-        }
-        Text(text = "${state.genres.size} genres found.")
-    }
-
-     */
 }
 
 @Composable
@@ -88,8 +62,10 @@ fun MovieCard(
 fun HomeScreenPreview() {
     MoviePunkTheme {
         Scaffold { padding ->
+            val emptyMovies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
             HomeScreen(
                 state = HomeState(),
+                trendingMovies = emptyMovies,
                 modifier = Modifier.padding(padding),
                 onEvent = {}
             )
