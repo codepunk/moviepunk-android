@@ -17,16 +17,18 @@ import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.TimeWindow
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
 @OptIn(ExperimentalPagingApi::class)
-class TrendingMovieRemoteMediator(
-    private val entityType: EntityType = EntityType.MOVIE,
-    private val timeWindow: TimeWindow = TimeWindow.DAY,
+class TrendingMovieRemoteMediator @AssistedInject constructor(
     private val multiDao: MultiDao,
     private val trendingMovieDao: TrendingMovieDao,
     private val trendingMovieRemoteKeyDao: TrendingMovieRemoteKeyDao,
     private val database: MoviePunkDatabase,
-    private val webservice: MoviePunkWebservice
+    private val webservice: MoviePunkWebservice,
+    @Assisted private val entityType: EntityType = EntityType.MOVIE,
+    @Assisted private val timeWindow: TimeWindow = TimeWindow.DAY
 ) : RemoteMediator<Int, MovieWithGenres>() {
 
     // region Methods
