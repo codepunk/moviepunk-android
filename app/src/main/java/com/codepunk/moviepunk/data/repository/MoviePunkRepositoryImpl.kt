@@ -39,15 +39,6 @@ class MoviePunkRepositoryImpl(
     private val trendingMoviePagerFactory: TrendingMoviePagerFactory
 ) : MoviePunkRepository {
 
-    // region Properties
-
-    /*
-    private val trendingMovieRemoteMediators: MutableMap<TimeWindow, TrendingMovieRemoteMediator> =
-        mutableMapOf()
-     */
-
-    // endregion Properties
-
     // region Methods
 
     private suspend fun getNewestGenre(): Instant = try {
