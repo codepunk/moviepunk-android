@@ -4,6 +4,7 @@ import androidx.paging.PagingConfig
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
+import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
@@ -38,7 +39,8 @@ class DataModule {
         dataStore: DataStore<UserSettings>,
          */
         webservice: MoviePunkWebservice,
-        trendingMoviePagerFactory: TrendingMoviePagerFactory
+        trendingMoviePagerFactory: TrendingMoviePagerFactory,
+        webScraper: WebScraper
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
         genreDao = db.genreDao(),
@@ -48,7 +50,8 @@ class DataModule {
         dataStore = dataStore,
          */
         webservice = webservice,
-        trendingMoviePagerFactory = trendingMoviePagerFactory
+        trendingMoviePagerFactory = trendingMoviePagerFactory,
+        webScraper = webScraper
     )
 
     // endregion Methods

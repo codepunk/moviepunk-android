@@ -37,7 +37,7 @@ class RemoteModule {
 
     @Singleton
     @Provides
-    fun provideDiscogsOkHttpClient(
+    fun provideOkHttpClient(
         cache: Cache,
         networkConnectionInterceptor: NetworkConnectionInterceptor,
         userAgentInterceptor: UserAgentInterceptor,

@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.data.repository
 import androidx.paging.PagingData
 import androidx.paging.map
 import app.cash.quiver.Absent
+import app.cash.quiver.asOutcome
 import app.cash.quiver.extensions.OutcomeOf
 import app.cash.quiver.failure
 import app.cash.quiver.present
@@ -15,6 +16,8 @@ import com.codepunk.moviepunk.data.mapper.combineToGenreEntities
 import com.codepunk.moviepunk.data.mapper.toGenre
 import com.codepunk.moviepunk.data.mapper.toMovie
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
+import com.codepunk.moviepunk.data.remote.dto.BackgroundDto
+import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
@@ -36,7 +39,8 @@ class MoviePunkRepositoryImpl(
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
-    private val trendingMoviePagerFactory: TrendingMoviePagerFactory
+    private val trendingMoviePagerFactory: TrendingMoviePagerFactory,
+    private val webScraper: WebScraper
 ) : MoviePunkRepository {
 
     // region Methods
@@ -135,6 +139,19 @@ class MoviePunkRepositoryImpl(
                 pagingData.map { it.toMovie() }
             }
     }
+
+    override fun getCuratedBackgrounds(): Flow<OutcomeOf<List<BackgroundDto>>> = flow<OutcomeOf<List<BackgroundDto>>> {
+        val result = try {
+            val scrapeResult = webScraper.scrapeTmdbWallpaper(
+                urlString = BuildConfig.TMDB_URL
+            ).toApiEither()
+            scrapeResult.asOutcome()
+        } catch (e: Exception) {
+            e.failure()
+        }
+
+        // TODO NEXT Cache / map / return value
+    }.flowOn(ioDispatcher)
 
     // endregion Methods
 

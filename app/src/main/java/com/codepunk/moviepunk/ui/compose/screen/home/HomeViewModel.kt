@@ -43,6 +43,7 @@ class HomeViewModel @Inject constructor(
     // region Constructors
 
     init {
+        getCuratedBackgrounds()
         getGenres()
         getTrendingMovies()
     }
@@ -75,6 +76,15 @@ class HomeViewModel @Inject constructor(
 
     fun getTrendingMovies() {
         trendingMoviesFlow = repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
+    }
+
+    fun getCuratedBackgrounds() {
+        viewModelScope.launch(context = ioDispatcher) {
+            val curatedBackgroundsFlow = repository.getCuratedBackgrounds()
+            curatedBackgroundsFlow.collect { outcome ->
+                // TODO
+            }
+        }
     }
 
     // endregion Methods

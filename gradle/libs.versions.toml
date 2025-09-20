@@ -4,12 +4,12 @@
 ##############################
 
 agp = "8.12.3"
-kotlin = "2.2.10"
+kotlin = "2.2.20"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.9.3"
+lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2025.09.00"
 
@@ -28,9 +28,11 @@ desugar = "2.1.5"
 hilt = "2.57.1"
 hiltNavigationCompose = "1.3.0"
 javapoet = "1.13.0"
-lifecycle = "2.9.3"
+jsoup = "1.21.2"
+lifecycle = "2.9.4"
 navigation = "2.9.4"
 paging = "3.3.6"
+ph-css = "8.0.0"
 quiver = "1.0.2"
 retrofit = "3.0.0"
 room = "2.8.0"
@@ -89,6 +91,10 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 
 # JavaPoet (needed due to an artifact introduced when using Hilt)
 javapoet = { group = "com.squareup", name = "javapoet", version.ref = "javapoet" }
+
+# Jsoup & PH-CSS (for parsing & scraping HTML & CSS files)
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+ph-css = { group = "com.helger", name = "ph-css", version.ref = "ph-css" }
 
 # Kotlin Gradle Plugin
 # kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kgp" }

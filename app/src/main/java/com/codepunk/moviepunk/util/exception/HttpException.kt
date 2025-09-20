@@ -27,4 +27,22 @@ open class HttpException(
 
     // endregion Overridden methods
 
+    // region Companion object
+
+    companion object {
+        /**
+         * Returns a predefined [HttpStatus] if the [code] matches one of the predefined values,
+         * otherwise it creates a new HttpStatus and attempts to match the category of the
+         * given code.
+         */
+        @JvmStatic
+        fun of(
+            code: Int
+        ): HttpException = HttpException(
+            httpStatus = HttpStatus.of(code)
+        )
+    }
+
+    // endregion Companion object
+
 }

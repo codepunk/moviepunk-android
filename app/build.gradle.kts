@@ -78,6 +78,14 @@ android {
         compose = true
     }
 
+    packaging {
+        resources {
+            // These were needed after adding the ph-css library to the build
+            excludes += "META-INF/NOTICE.md"
+            pickFirsts += "META-INF/buildinfo.xml"
+        }
+    }
+
     applicationVariants.all {
         extractLocalProperty(
             project.rootProject,
@@ -94,6 +102,12 @@ android {
             "long",
             "OK_HTTP_CLIENT_CACHE_SIZE",
             "10 * 1024 * 1024"
+        )
+
+        buildConfigField(
+            "String",
+            "TMDB_URL",
+            "\"https://www.themoviedb.org\""
         )
 
         buildConfigField(
@@ -162,6 +176,10 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Jsoup & PH-CSS (for parsing & scraping HTML & CSS files)
+    implementation(libs.jsoup)
+    implementation(libs.ph.css)
 
     // Lifecycle
     implementation(libs.lifecycle.process)
