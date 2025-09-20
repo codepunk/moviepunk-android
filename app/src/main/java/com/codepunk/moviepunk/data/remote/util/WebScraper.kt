@@ -154,22 +154,23 @@ class WebScraper @Inject constructor(
         cssString: String
     ): List<BackgroundDto> {
         val backgroundDtos: MutableList<BackgroundDto> = mutableListOf()
-        val css: CascadingStyleSheet = CSSReader.readFromString(cssString)
-        CSSVisitor.visitCSS(
-            css,
-            object : DefaultCSSVisitor() {
-                override fun onBeginStyleRule(aStyleRule: CSSStyleRule) {
-                    val backgroundName = aStyleRule.findBackgroundName() ?: return
+        CSSReader.readFromString(cssString)?.also { css ->
+            CSSVisitor.visitCSS(
+                css,
+                object : DefaultCSSVisitor() {
+                    override fun onBeginStyleRule(aStyleRule: CSSStyleRule) {
+                        val backgroundName = aStyleRule.findBackgroundName() ?: return
 
-                    // If we arrive here, we are in a "background" style rule
-                    backgroundDtos.addAll(
-                        aStyleRule.allDeclarations.mapNotNull { declaration ->
-                            declaration.toBackgroundDtos(hash, backgroundName)
-                        }.flatten()
-                    )
+                        // If we arrive here, we are in a "background" style rule
+                        backgroundDtos.addAll(
+                            aStyleRule.allDeclarations.mapNotNull { declaration ->
+                                declaration.toBackgroundDtos(hash, backgroundName)
+                            }.flatten()
+                        )
+                    }
                 }
-            }
-        )
+            )
+        }
         return backgroundDtos.toList()
     }
 
@@ -205,10 +206,10 @@ class WebScraper @Inject constructor(
         }.forEach { imageSet ->
             val urlStrings: MutableList<String> = mutableListOf()
             val densities: MutableList<String> = mutableListOf()
-            imageSet.expression.allMembers.forEach { member ->
+            imageSet.expression?.allMembers?.forEach { member ->
                 when (member) {
                     is CSSExpressionMemberTermURI -> {
-                        urlStrings.add(member.uri.asCSSString)
+                        urlStrings.add(member.uri.uri)
                     }
                     is CSSExpressionMemberTermSimple -> {
                         densities.add(member.value)

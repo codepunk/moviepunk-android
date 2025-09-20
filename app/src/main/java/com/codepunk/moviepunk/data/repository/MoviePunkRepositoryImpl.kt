@@ -151,6 +151,7 @@ class MoviePunkRepositoryImpl(
         }
 
         // TODO NEXT Cache / map / return value
+        Timber.i("result: $result")
     }.flowOn(ioDispatcher)
 
     // endregion Methods

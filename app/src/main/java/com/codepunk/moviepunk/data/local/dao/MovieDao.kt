@@ -38,6 +38,7 @@ interface MovieDao {
     @Query("SELECT * FROM movie WHERE id IN (:ids)")
     suspend fun getMoviesWithGenresByIds(ids: List<Long>): List<MovieWithGenres>
 
+    @Transaction
     @Query("""
         SELECT movie.*
         FROM trending_movie, movie
