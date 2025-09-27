@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.data.repository
 
+import android.net.ConnectivityManager
 import androidx.paging.PagingData
 import androidx.paging.map
 import app.cash.quiver.Absent
@@ -16,15 +17,16 @@ import com.codepunk.moviepunk.data.mapper.combineToGenreEntities
 import com.codepunk.moviepunk.data.mapper.toGenre
 import com.codepunk.moviepunk.data.mapper.toMovie
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
-import com.codepunk.moviepunk.data.remote.dto.BackgroundDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.EntityType
 import com.codepunk.moviepunk.domain.model.Genre
+import com.codepunk.moviepunk.domain.model.HashedImage
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
+import com.codepunk.moviepunk.util.extension.isConnected
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
@@ -40,7 +42,8 @@ class MoviePunkRepositoryImpl(
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
     private val trendingMoviePagerFactory: TrendingMoviePagerFactory,
-    private val webScraper: WebScraper
+    private val webScraper: WebScraper,
+    private val connectivityManager: ConnectivityManager
 ) : MoviePunkRepository {
 
     // region Methods
@@ -140,20 +143,47 @@ class MoviePunkRepositoryImpl(
             }
     }
 
-    override fun getCuratedBackgrounds(): Flow<OutcomeOf<List<BackgroundDto>>> = flow<OutcomeOf<List<BackgroundDto>>> {
-        val result = try {
-            val scrapeResult = webScraper.scrapeTmdbWallpaper(
-                urlString = BuildConfig.TMDB_URL
-            ).toApiEither()
-            scrapeResult.asOutcome()
-        } catch (e: Exception) {
-            e.failure()
-        }
+    /**
+     * This method works a little differently than getLocalGenres.
+     * We need to do the following:
+     * 1. IF we have a connection:
+     *    a. Get the current background hash from TMDB website
+     *    b. If it is different than cache, re-retrieve all backgrounds
+     *    c. Re-cache those backgrounds
+     *    d. ???? Should I try to download/cache the images themselves at this stage?
+     * 2. Retrieve all from cache
+     */
+    override fun getHashedBackgroundImages(): Flow<OutcomeOf<List<HashedImage>>> =
+        flow<OutcomeOf<List<HashedImage>>> {
+            if (connectivityManager.isConnected) {
 
-        // TODO NEXT Cache / map / return value
-        Timber.i("result: $result")
-    }.flowOn(ioDispatcher)
+                val hash = try {
+                    val hashResult = webScraper.scrapeTmdbWallpaperHash(
+                        urlString = BuildConfig.TMDB_URL
+                    ).body()
 
-    // endregion Methods
+                    // TODO NEXT
 
-}
+                    hashResult
+                } catch (e: Exception) {
+                    ""
+                }
+
+                val result = try {
+                    val scrapeResult = webScraper.scrapeTmdbWallpaper(
+                        urlString = BuildConfig.TMDB_URL
+                    ).toApiEither()
+                    scrapeResult.asOutcome()
+                } catch (e: Exception) {
+                    e.failure()
+                }
+
+                // TODO NEXT Cache / map / return value
+                Timber.i("result: $result")
+            }
+
+        }.flowOn(ioDispatcher)
+
+        // endregion Methods
+
+    }

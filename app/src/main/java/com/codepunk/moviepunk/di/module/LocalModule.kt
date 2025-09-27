@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.HashedImageDao
 import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
@@ -33,6 +34,11 @@ object LocalModule {
     @Provides
     @Singleton
     fun provideGenreDao(database: MoviePunkDatabase): GenreDao = database.genreDao()
+
+    @Provides
+    @Singleton
+    fun provideHashedImageDao(database: MoviePunkDatabase): HashedImageDao =
+        database.hashedImageDao()
 
     @Provides
     @Singleton

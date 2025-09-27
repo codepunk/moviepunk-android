@@ -80,7 +80,7 @@ class HomeViewModel @Inject constructor(
 
     fun getCuratedBackgrounds() {
         viewModelScope.launch(context = ioDispatcher) {
-            val curatedBackgroundsFlow = repository.getCuratedBackgrounds()
+            val curatedBackgroundsFlow = repository.getHashedBackgroundImages()
             curatedBackgroundsFlow.collect { outcome ->
                 // TODO
             }

@@ -8,7 +8,7 @@ import kotlin.time.Clock
 // region Methods
 
 // ====================
-// Response to entity
+// Dto to entity
 // ====================
 
 fun GenreDto.toGenreEntity(
