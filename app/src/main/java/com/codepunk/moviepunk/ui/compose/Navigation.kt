@@ -1,6 +1,7 @@
 package com.codepunk.moviepunk.ui.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -10,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.codepunk.moviepunk.ui.compose.screen.home.HomeScreen
 import com.codepunk.moviepunk.ui.compose.screen.home.HomeViewModel
+import timber.log.Timber
 
 @Composable
 fun Navigation(
@@ -24,15 +26,21 @@ fun Navigation(
 
         composable<Routes.Home> {
             val viewModel: HomeViewModel = hiltViewModel()
+
+            LaunchedEffect(Unit) {
+                viewModel.messageFlow.collect { message ->
+                    Timber.d("Received message: $message")
+                }
+            }
+
             val state = viewModel.stateFlow.collectAsStateWithLifecycle()
-            val trendingMoviesLazyPagingItems =
-                viewModel.trendingMoviesFlow.collectAsLazyPagingItems()
+            val trendingMovies = viewModel.trendingMoviesFlow.collectAsLazyPagingItems()
             HomeScreen(
                 state = state.value,
-                trendingMovies = trendingMoviesLazyPagingItems,
+                trendingMovies = trendingMovies,
                 modifier = modifier
-            ) { event ->
-                // Handle events here
+            ) { intent ->
+                viewModel.sendIntent(intent)
             }
         }
 

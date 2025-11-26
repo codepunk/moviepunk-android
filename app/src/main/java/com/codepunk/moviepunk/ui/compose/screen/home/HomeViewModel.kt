@@ -1,10 +1,13 @@
 package com.codepunk.moviepunk.ui.compose.screen.home
 
-import androidx.lifecycle.ViewModel
+import android.net.ConnectivityManager
+import android.net.NetworkRequest
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import app.cash.quiver.getOrElse
+import arrow.core.getOrElse
+import com.codepunk.moviepunk.core.CoreViewModel
+import com.codepunk.moviepunk.di.qualifier.InternetRequest
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.domain.model.TimeWindow
@@ -23,7 +26,12 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val repository: MoviePunkRepository,
-) : ViewModel() {
+    @InternetRequest networkRequest: NetworkRequest,
+    connectivityManager: ConnectivityManager,
+) : CoreViewModel<HomeIntent, HomeMessage>(
+    networkRequest = networkRequest,
+    connectivityManager = connectivityManager
+) {
 
     // region Variables
 
@@ -43,7 +51,7 @@ class HomeViewModel @Inject constructor(
     // region Constructors
 
     init {
-        getCuratedBackgrounds()
+        getCuratedContent()
         getGenres()
         getTrendingMovies()
     }
@@ -52,23 +60,26 @@ class HomeViewModel @Inject constructor(
 
     // region Methods
 
+    fun getCuratedContent() {
+        viewModelScope.launch(context = ioDispatcher) {
+            val curatedBackgroundsFlow = repository.getRandomCuratedContentItem()
+            curatedBackgroundsFlow.collect { outcome ->
+                // TODO
+            }
+        }
+    }
+
     fun getGenres() {
         viewModelScope.launch(context = ioDispatcher) {
-            repository.getGenres().collect { outcome ->
-                Timber.d(message = "Genres outcome: $outcome")
-
-                /* If outcome.left has a value, use that
-                 * else if right has a value, null
-                 * else use existing value
-                 */
+            state = state.copy(
+                genresLoading = true
+            )
+            repository.getGenres().collect { result ->
+                Timber.d(message = "Genres result: $result")
                 state = state.copy(
-                    genresLoading = outcome.isAbsent(),
-                    genres = outcome.getOrElse { state.genres },
-                    genresError = when {
-                        outcome.isFailure() -> outcome.inner.leftOrNull()
-                        outcome.isPresent() -> null
-                        else -> state.genresError
-                    }
+                    genresLoading = false,
+                    genres = result.getOrElse { state.genres },
+                    genresError = result.leftOrNull()
                 )
             }
         }
@@ -78,11 +89,12 @@ class HomeViewModel @Inject constructor(
         trendingMoviesFlow = repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
     }
 
-    fun getCuratedBackgrounds() {
-        viewModelScope.launch(context = ioDispatcher) {
-            val curatedBackgroundsFlow = repository.getCuratedBackgrounds()
-            curatedBackgroundsFlow.collect { outcome ->
-                // TODO
+    override fun sendIntent(intent: HomeIntent) {
+        when (intent) {
+            is HomeIntent.TestIntent -> {
+                viewModelScope.launch {
+                    sendMessage(HomeMessage.TestMessage)
+                }
             }
         }
     }

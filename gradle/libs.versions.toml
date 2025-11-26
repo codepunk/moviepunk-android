@@ -4,14 +4,14 @@
 ##############################
 
 agp = "8.12.3"
-kotlin = "2.2.20"
+kotlin = "2.2.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.9.4"
-activityCompose = "1.11.0"
-composeBom = "2025.09.00"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.0"
+composeBom = "2025.11.01"
 
 ##############################
 # Added by Codepunk
@@ -19,23 +19,22 @@ composeBom = "2025.09.00"
 
 # See https://github.com/google/ksp/releases
 # to find which ksp version works with with which version of kotlin
-ksp = "2.2.10-2.0.2"
+ksp = "2.2.21-2.0.4"
 
-arrow = "2.1.2"
-datastore = "1.1.7"
+arrow = "2.2.0"
+datastore = "1.2.0"
 datetime = "0.7.1"
 desugar = "2.1.5"
-hilt = "2.57.1"
+hilt = "2.57.2"
 hiltNavigationCompose = "1.3.0"
 javapoet = "1.13.0"
 jsoup = "1.21.2"
-lifecycle = "2.9.4"
-navigation = "2.9.4"
+lifecycle = "2.10.0"
+navigation = "2.9.6"
 paging = "3.3.6"
-ph-css = "8.0.0"
-quiver = "1.0.2"
+ph-css = "8.1.0"
 retrofit = "3.0.0"
-room = "2.8.0"
+room = "2.8.4"
 serialization = "1.9.0"
 timber = "5.0.1"
 
@@ -66,11 +65,10 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 # Android Gradle Plugin
 android-gradle-plugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 
-# Arrow (and Quiver)
+# Arrow
 arrow-core = { group = "io.arrow-kt", name = "arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { group = "io.arrow-kt", name = "arrow-fx-coroutines", version.ref = "arrow" }
 arrow-core-retrofit = { group = "io.arrow-kt", name = "arrow-core-retrofit", version.ref = "arrow" }
-quiver = { group = "app.cash.quiver", name = "lib", version.ref = "quiver" }
 
 # Datastore (Preferences)
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

@@ -43,12 +43,14 @@ class DataModule {
         webScraper: WebScraper
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
+        curatedContentDao = db.curatedContentDao(),
         genreDao = db.genreDao(),
         movieDao = db.movieDao(),
         /* TODO
         connectivityManager = connectivityManager,
         dataStore = dataStore,
          */
+        db = db,
         webservice = webservice,
         trendingMoviePagerFactory = trendingMoviePagerFactory,
         webScraper = webScraper

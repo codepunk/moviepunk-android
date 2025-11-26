@@ -2,28 +2,23 @@ package com.codepunk.moviepunk.data.repository
 
 import androidx.paging.PagingData
 import androidx.paging.map
-import app.cash.quiver.Absent
-import app.cash.quiver.asOutcome
-import app.cash.quiver.extensions.OutcomeOf
-import app.cash.quiver.failure
-import app.cash.quiver.present
+import androidx.room.withTransaction
+import arrow.core.Either
+import arrow.core.left
 import arrow.core.raise.either
+import arrow.core.right
 import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
-import com.codepunk.moviepunk.data.mapper.combineToGenreEntities
-import com.codepunk.moviepunk.data.mapper.toGenre
-import com.codepunk.moviepunk.data.mapper.toMovie
+import com.codepunk.moviepunk.data.mapper.*
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
-import com.codepunk.moviepunk.data.remote.dto.BackgroundDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
-import com.codepunk.moviepunk.domain.model.EntityType
-import com.codepunk.moviepunk.domain.model.Genre
-import com.codepunk.moviepunk.domain.model.Movie
-import com.codepunk.moviepunk.domain.model.TimeWindow
+import com.codepunk.moviepunk.domain.model.*
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,6 +31,8 @@ import kotlin.time.Instant
 
 class MoviePunkRepositoryImpl(
     private val ioDispatcher: CoroutineDispatcher,
+    private val curatedContentDao: CuratedContentDao,
+    private val db: MoviePunkDatabase,
     private val genreDao: GenreDao,
     private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
@@ -56,12 +53,12 @@ class MoviePunkRepositoryImpl(
      * and then update it if necessary. It relies on [GenreDao.getGenres] returning a
      * [Flow]<[List]<[GenreEntity]>>.
      */
-    private fun getLocalGenres(): Flow<OutcomeOf<List<GenreEntity>>> = channelFlow {
+    private fun getLocalGenres(): Flow<Either<Exception, List<GenreEntity>>> = channelFlow {
         // Emit cached genres (and keep emitting as they are updated)
         launch {
             genreDao.getGenres()
-                .map { localGenres -> localGenres.present() }
-                .catch { e -> e.failure() }
+                .map { localGenres -> localGenres.right() }
+                .catch { e -> e.left() }
                 .collect { send(it) }
         }
 
@@ -70,7 +67,6 @@ class MoviePunkRepositoryImpl(
         val needsRefresh = Clock.System.now() - getNewestGenre() > duration
         if (needsRefresh) {
             Timber.i(message = "Genre data is out of date, updating")
-            send(Absent)
             either {
                 // TODO Do I need all of these separate try's? Can they be combined?
                 // bind() will raise any non-CancellationException from toApiEither()
@@ -110,26 +106,26 @@ class MoviePunkRepositoryImpl(
                 }
             }.onLeft { e ->
                 // This will now only receive non-CancellationExceptions
-                send(e.failure())
+                send(e.left())
             }
         } else {
             Timber.i(message = "Genre data is up to date")
         }
     }.flowOn(ioDispatcher)
 
-    override fun getGenres(): Flow<OutcomeOf<List<Genre>>> =
+    override fun getGenres(): Flow<Either<Exception, List<Genre>>> =
         getLocalGenres().map { outcome ->
             outcome.map { localGenres ->
                 localGenres.map { it.toGenre() }
             }
         }
 
-    override fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
-        emit(Absent)
+    override fun getMovieGenres(): Flow<Either<Exception, List<Genre>>> = flow<Either<Exception, List<Genre>>> {
+        // emit(Absent)
     }.flowOn(ioDispatcher)
 
-    override fun getTvGenres(): Flow<OutcomeOf<List<Genre>>> = flow {
-        emit(Absent)
+    override fun getTvGenres(): Flow<Either<Exception, List<Genre>>> = flow<Either<Exception, List<Genre>>> {
+        // emit(Absent)
     }.flowOn(ioDispatcher)
 
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
@@ -140,18 +136,33 @@ class MoviePunkRepositoryImpl(
             }
     }
 
-    override fun getCuratedBackgrounds(): Flow<OutcomeOf<List<BackgroundDto>>> = flow<OutcomeOf<List<BackgroundDto>>> {
-        val result = try {
-            val scrapeResult = webScraper.scrapeTmdbWallpaper(
-                urlString = BuildConfig.TMDB_URL
-            ).toApiEither()
-            scrapeResult.asOutcome()
-        } catch (e: Exception) {
-            e.failure()
+    override fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem>> = flow {
+        // TODO NEXT: Make a "CuratedWebservice" that makes use of WebScraper internally
+
+        // Get the CSS href for curated content
+        val cssHref = webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL) ?: return@flow
+
+        // Get the locally-stored CSS href if one exists
+        val localCssHref = curatedContentDao.getCuratedContentHref()
+
+        // Refresh curated content if necessary
+        if (cssHref != localCssHref) {
+            val curatedContentEntities = webScraper.scrapeUrlForCuratedContent(
+                baseUrl = BuildConfig.TMDB_URL,
+                cssHref = cssHref
+            ).map {
+                it.toCuratedContentItemEntity()
+            }
+
+            db.withTransaction {
+                curatedContentDao.clearCuratedContent()
+                curatedContentDao.insertAll(curatedContentEntities)
+            }
         }
 
-        // TODO NEXT Cache / map / return value
-        Timber.i("result: $result")
+        val curatedContentItem =
+            curatedContentDao.getRandomCuratedContentItem()?.toCuratedContentItem()
+        curatedContentItem?.apply { emit(this.right()) }
     }.flowOn(ioDispatcher)
 
     // endregion Methods

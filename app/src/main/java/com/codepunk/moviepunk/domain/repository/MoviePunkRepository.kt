@@ -1,8 +1,8 @@
 package com.codepunk.moviepunk.domain.repository
 
 import androidx.paging.PagingData
-import app.cash.quiver.extensions.OutcomeOf
-import com.codepunk.moviepunk.data.remote.dto.BackgroundDto
+import arrow.core.Either
+import com.codepunk.moviepunk.domain.model.CuratedContentItem
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.domain.model.TimeWindow
@@ -12,15 +12,15 @@ interface MoviePunkRepository {
 
     // region Methods
 
-    fun getGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getGenres(): Flow<Either<Exception, List<Genre>>>
 
-    fun getMovieGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getMovieGenres(): Flow<Either<Exception, List<Genre>>>
 
-    fun getTvGenres(): Flow<OutcomeOf<List<Genre>>>
+    fun getTvGenres(): Flow<Either<Exception, List<Genre>>>
 
     fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>
 
-    fun getCuratedBackgrounds(): Flow<OutcomeOf<List<BackgroundDto>>>
+    fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem>>
 
     // endregion Methods
 

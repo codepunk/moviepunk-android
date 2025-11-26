@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.MovieDao
@@ -29,6 +30,12 @@ object LocalModule {
             klass = MoviePunkDatabase::class.java,
             name = "moviepunk_db"
         ).build()
+
+    @Provides
+    @Singleton
+    fun provideCuratedContentDao(
+        database: MoviePunkDatabase
+    ): CuratedContentDao = database.curatedContentDao()
 
     @Provides
     @Singleton

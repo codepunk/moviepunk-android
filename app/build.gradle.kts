@@ -156,11 +156,10 @@ dependencies {
      * Added by Codepunk
      **********************************/
 
-    // Arrow (and Quiver)
+    // Arrow
     implementation(libs.arrow.core)
     implementation(libs.arrow.fx.coroutines)
     implementation(libs.arrow.core.retrofit)
-    implementation(libs.quiver)
 
     // Datastore
     implementation(libs.datastore.preferences)

@@ -89,7 +89,7 @@ class RemoteModule {
 
     @Singleton
     @Provides
-    fun provideHollarhypeWebService(
+    fun provideMoviePunkWebService(
         retrofit: Retrofit
     ): MoviePunkWebservice = retrofit.create(MoviePunkWebservice::class.java)
 

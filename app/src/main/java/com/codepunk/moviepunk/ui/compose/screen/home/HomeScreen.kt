@@ -2,6 +2,8 @@ package com.codepunk.moviepunk.ui.compose.screen.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -28,7 +30,7 @@ fun HomeScreen(
     trendingMovies: LazyPagingItems<Movie>,
     modifier: Modifier = Modifier,
     @Suppress("unused")
-    onEvent: (HomeEvent) -> Unit
+    onIntent: (HomeIntent) -> Unit = {}
 ) {
     LaunchedEffect(key1 = trendingMovies.loadState) {
         Timber.i("trendingMovies.loadState = ${trendingMovies.loadState}")
@@ -73,6 +75,30 @@ fun HomeScreen(
                 }
             }
         }
+
+        // TODO TEMP
+        AlertDialog( // 3
+            onDismissRequest = { // 4
+                // shouldShowDialog.value = false
+            },
+            // 5
+            title = { Text(text = "Alert Dialog") },
+            text = { Text(text = "Jetpack Compose Alert Dialog") },
+            confirmButton = { // 6
+                Button(
+                    onClick = {
+                        //shouldShowDialog.value = false
+                        onIntent(HomeIntent.TestIntent)
+                    }
+                ) {
+                    Text(
+                        text = "Confirm",
+                        //color = Color.White
+                    )
+                }
+            }
+        )
+        // END TEMP
     }
 }
 
@@ -100,8 +126,7 @@ fun HomeScreenPreview() {
             HomeScreen(
                 state = HomeState(),
                 trendingMovies = emptyMovies,
-                modifier = Modifier.padding(padding),
-                onEvent = {}
+                modifier = Modifier.padding(padding)
             )
         }
     }

@@ -52,6 +52,6 @@ data class MovieEntity(
     val createdAt: Instant = Clock.System.now(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Instant = Clock.System.now()
+    val updatedAt: Instant = createdAt
 
 )
