@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.di.module
 
+import android.net.ConnectivityManager
 import androidx.paging.PagingConfig
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
@@ -40,7 +41,8 @@ class DataModule {
          */
         webservice: MoviePunkWebservice,
         trendingMoviePagerFactory: TrendingMoviePagerFactory,
-        webScraper: WebScraper
+        webScraper: WebScraper,
+        connectivityManager: ConnectivityManager
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         ioDispatcher = ioDispatcher,
         curatedContentDao = db.curatedContentDao(),
@@ -53,7 +55,8 @@ class DataModule {
         db = db,
         webservice = webservice,
         trendingMoviePagerFactory = trendingMoviePagerFactory,
-        webScraper = webScraper
+        webScraper = webScraper,
+        connectivityManager = connectivityManager
     )
 
     // endregion Methods

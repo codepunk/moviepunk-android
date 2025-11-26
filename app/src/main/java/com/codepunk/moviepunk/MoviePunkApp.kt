@@ -2,6 +2,7 @@ package com.codepunk.moviepunk
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.codepunk.moviepunk.manager.DataUpdateManager
 import com.codepunk.moviepunk.util.lifecycle.ProcessLifecycleObserver
 import com.codepunk.moviepunk.util.log.FormattingDebugTree
 import dagger.hilt.android.HiltAndroidApp
@@ -25,6 +26,9 @@ class MoviePunkApp : Application() {
 
     @Inject
     lateinit var processLifecycleObserver: ProcessLifecycleObserver
+
+    @Inject
+    lateinit var dataUpdateManager: DataUpdateManager
 
     // region Methods
 
