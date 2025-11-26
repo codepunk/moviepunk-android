@@ -114,8 +114,8 @@ class MoviePunkRepositoryImpl(
     }.flowOn(ioDispatcher)
 
     override fun getGenres(): Flow<Either<Exception, List<Genre>>> =
-        getLocalGenres().map { outcome ->
-            outcome.map { localGenres ->
+        getLocalGenres().map { result ->
+            result.map { localGenres ->
                 localGenres.map { it.toGenre() }
             }
         }
