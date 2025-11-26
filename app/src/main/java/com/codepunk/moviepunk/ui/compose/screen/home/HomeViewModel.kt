@@ -61,10 +61,16 @@ class HomeViewModel @Inject constructor(
     // region Methods
 
     fun getCuratedContent() {
+        state = state.copy(
+            curatedContentLoading = true
+        )
         viewModelScope.launch(context = ioDispatcher) {
-            val curatedBackgroundsFlow = repository.getRandomCuratedContentItem()
-            curatedBackgroundsFlow.collect { result ->
-                // TODO
+            repository.getRandomCuratedContentItem().collect { result ->
+                state = state.copy(
+                    curatedContentLoading = false,
+                    curatedContentItem = result.getOrElse { state.curatedContentItem },
+                    curatedContentError = result.leftOrNull()
+                )
             }
         }
     }

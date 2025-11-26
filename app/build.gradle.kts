@@ -161,6 +161,10 @@ dependencies {
     implementation(libs.arrow.fx.coroutines)
     implementation(libs.arrow.core.retrofit)
 
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
+
     // Datastore
     implementation(libs.datastore.preferences)
     implementation(libs.datastore.proto)

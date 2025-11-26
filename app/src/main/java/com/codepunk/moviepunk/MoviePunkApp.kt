@@ -2,6 +2,9 @@ package com.codepunk.moviepunk
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.request.crossfade
 import com.codepunk.moviepunk.util.lifecycle.ProcessLifecycleObserver
 import com.codepunk.moviepunk.util.log.FormattingDebugTree
 import dagger.hilt.android.HiltAndroidApp
@@ -30,9 +33,16 @@ class MoviePunkApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
         ProcessLifecycleOwner.get().lifecycle.addObserver(processLifecycleObserver)
         if (BuildConfig.DEBUG) {
             Timber.plant(FormattingDebugTree())
+        }
+
+        SingletonImageLoader.setSafe { context ->
+            ImageLoader.Builder(context)
+                .crossfade(true)
+                .build()
         }
     }
 
