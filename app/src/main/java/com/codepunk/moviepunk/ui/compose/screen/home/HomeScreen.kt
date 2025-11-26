@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.ui.compose.screen.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +13,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.PagingData
@@ -43,6 +49,13 @@ fun HomeScreen(
 
     Timber.d("curatedContentItem = ${state.curatedContentItem}")
 
+    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+
+    // In portrait, the height will be whatever
+    // In landscape, the height should be no larger than the screen WIDTH
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -62,18 +75,36 @@ fun HomeScreen(
                         model = state.curatedContentItem.url,
                         contentDescription = "Curated Content Image",
                         success = { successState ->
-                            val aspectRatio = if (painter.intrinsicSize.isSpecified) {
-                                painter.intrinsicSize.width / painter.intrinsicSize.height
-                            } else {
-                                880f / 600f
-                            }
                             Image(
                                 painter = successState.painter,
                                 contentDescription = contentDescription,
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .aspectRatio(aspectRatio),
-                                contentScale = ContentScale.Crop
+                                    .then(
+                                        // TODO This is messy but it works for now. Need to find a cleaner way.
+                                        when {
+                                            configuration.orientation == Configuration.ORIENTATION_LANDSCAPE -> {
+                                                Modifier.height(
+                                                    with(density) {
+                                                        windowInfo.containerSize.height.toDp()
+                                                    }
+                                                )
+                                            }
+                                            painter.intrinsicSize.isUnspecified -> {
+                                                Modifier.height(
+                                                    with(density) {
+                                                        windowInfo.containerSize.width.times(880f / 600f).toDp()
+                                                    }
+                                                )
+                                            }
+                                            else -> {
+                                                Modifier.aspectRatio(
+                                                    painter.intrinsicSize.width / painter.intrinsicSize.height
+                                                )
+                                            }
+                                        }
+                                    )
                             )
                         }
                     )
@@ -93,7 +124,9 @@ fun HomeScreen(
                 item {
                     if (trendingMovies.loadState.append is LoadState.Loading) {
                         Box(
-                            modifier = Modifier.fillMaxWidth().height(150.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.align(Alignment.Center)
@@ -112,7 +145,8 @@ fun MovieCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
             .height(150.dp)
     ) {
         Text(
