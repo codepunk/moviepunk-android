@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.IOException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -136,16 +137,23 @@ class MoviePunkRepositoryImpl(
             }
     }
 
-    override fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem>> = flow {
-        // TODO NEXT: Make a "CuratedWebservice" that makes use of WebScraper internally
+    override fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem?>> = flow {
+        // Get locally-stored curated content
+        emit(
+            curatedContentDao.getRandomCuratedContentItem()?.toCuratedContentItem().right()
+        )
+
+        // TODO Maybe check timestamp of last update to avoid unnecessary scraping
 
         // Get the CSS href for curated content
-        val cssHref = webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL) ?: return@flow
+        val cssHref = webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
+        if (cssHref == null) {
+            emit(IOException("Failed to retrieve CSS href").left())
+            return@flow
+        }
 
         // Get the locally-stored CSS href if one exists
         val localCssHref = curatedContentDao.getCuratedContentHref()
-
-        // Refresh curated content if necessary
         if (cssHref != localCssHref) {
             val curatedContentEntities = webScraper.scrapeUrlForCuratedContent(
                 baseUrl = BuildConfig.TMDB_URL,
@@ -158,11 +166,11 @@ class MoviePunkRepositoryImpl(
                 curatedContentDao.clearCuratedContent()
                 curatedContentDao.insertAll(curatedContentEntities)
             }
-        }
 
-        val curatedContentItem =
-            curatedContentDao.getRandomCuratedContentItem()?.toCuratedContentItem()
-        curatedContentItem?.apply { emit(this.right()) }
+            val curatedContentItem =
+                curatedContentDao.getRandomCuratedContentItem()?.toCuratedContentItem()
+            curatedContentItem?.apply { emit(this.right()) }
+        }
     }.flowOn(ioDispatcher)
 
     // endregion Methods

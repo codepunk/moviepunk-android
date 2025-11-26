@@ -41,7 +41,6 @@ class HomeViewModel @Inject constructor(
     var trendingMoviesFlow: Flow<PagingData<Movie>> = flowOf(PagingData.empty())
         private set
 
-    @Suppress("unused")
     private var state: HomeState
         get() = _stateFlow.value
         set(value) { _stateFlow.value = value }

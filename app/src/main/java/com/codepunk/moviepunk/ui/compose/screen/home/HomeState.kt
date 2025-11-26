@@ -5,7 +5,7 @@ import com.codepunk.moviepunk.domain.model.Genre
 
 data class HomeState(
     val curatedContentLoading: Boolean = false,
-    val curatedContentItem: CuratedContentItem = CuratedContentItem(),
+    val curatedContentItem: CuratedContentItem? = null,
     val curatedContentError: Throwable? = null,
     val genresLoading: Boolean = false,
     val genres: List<Genre> = emptyList(),

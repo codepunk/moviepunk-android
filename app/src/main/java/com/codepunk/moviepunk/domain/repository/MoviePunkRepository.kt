@@ -20,7 +20,7 @@ interface MoviePunkRepository {
 
     fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>
 
-    fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem>>
+    fun getRandomCuratedContentItem(): Flow<Either<Exception, CuratedContentItem?>>
 
     // endregion Methods
 

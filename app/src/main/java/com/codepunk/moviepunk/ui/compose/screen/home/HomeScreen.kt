@@ -39,10 +39,12 @@ fun HomeScreen(
     onIntent: (HomeIntent) -> Unit = {}
 ) {
     LaunchedEffect(key1 = trendingMovies.loadState) {
+        /*
         Timber.i("trendingMovies.loadState = ${trendingMovies.loadState}")
         if (trendingMovies.loadState.refresh is LoadState.Error) {
             "Hello"
         }
+         */
     }
 
     Timber.d("curatedContentItem = ${state.curatedContentItem}")
@@ -50,9 +52,6 @@ fun HomeScreen(
     val configuration = LocalConfiguration.current
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
-
-    // In portrait, the height will be whatever
-    // In landscape, the height should be no larger than the screen WIDTH
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -70,7 +69,7 @@ fun HomeScreen(
                     SubcomposeAsyncImage(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        model = state.curatedContentItem.url,
+                        model = state.curatedContentItem?.url,
                         contentDescription = "Curated Content Image",
                         success = { successState ->
                             Image(
