@@ -208,6 +208,9 @@ dependencies {
     // Serialization
     implementation(libs.serialization)
 
+    // Splash screen
+    implementation(libs.splashscreen)
+
     // Timber
     implementation(libs.timber)
 

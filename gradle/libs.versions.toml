@@ -37,6 +37,7 @@ ph-css = "8.1.0"
 retrofit = "3.0.0"
 room = "2.8.4"
 serialization = "1.9.0"
+splashscreen = "1.2.0"
 timber = "5.0.1"
 
 [libraries]
@@ -125,6 +126,9 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 
 # Kotlin serialization runtime library
 serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+
+# Splash screen
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 # Timber
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
