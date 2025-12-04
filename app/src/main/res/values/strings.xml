@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">MoviePunk</string>
+    <string name="not_connected_to_internet">Not connected to Internet</string>
+
+    <string name="airing_today">Airing Today</string>
+    <string name="discussions">Discussions</string>
+    <string name="leaderboard">Leaderboard</string>
+    <string name="more">More</string>
+    <string name="movies">Movies</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="people">People</string>
+    <string name="popular">Popular</string>
+    <string name="support">Support</string>
+    <string name="top_rated">Top Rated</string>
+    <string name="tv_shows">TV Shows</string>
+    <string name="upcoming">Upcoming</string>
+</resources>
