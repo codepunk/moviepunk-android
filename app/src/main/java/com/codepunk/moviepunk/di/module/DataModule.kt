@@ -3,7 +3,12 @@ package com.codepunk.moviepunk.di.module
 import android.net.ConnectivityManager
 import androidx.paging.PagingConfig
 import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.CombinedDao
+import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
+import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.remote.util.WebScraper
+import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
@@ -32,21 +37,25 @@ class DataModule {
     fun provideMoviePunkRepository(
         connectivityManager: ConnectivityManager,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
-        /*
         db: MoviePunkDatabase,
+        combinedDao: CombinedDao,
+        curatedContentDao: CuratedContentDao,
+        genreDao: GenreDao,
         webservice: MoviePunkWebservice,
+        /*
         trendingMoviePagerFactory: TrendingMoviePagerFactory,
          */
         webScraper: WebScraper
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         connectivityManager = connectivityManager,
         ioDispatcher = ioDispatcher,
-        /*
-        curatedContentDao = db.curatedContentDao(),
-        genreDao = db.genreDao(),
-        movieDao = db.movieDao(),
         db = db,
+        combinedDao = combinedDao,
+        curatedContentDao = curatedContentDao,
+        genreDao = genreDao,
         webservice = webservice,
+        /*
+        movieDao = movieDao,
         trendingMoviePagerFactory = trendingMoviePagerFactory,
          */
         webScraper = webScraper

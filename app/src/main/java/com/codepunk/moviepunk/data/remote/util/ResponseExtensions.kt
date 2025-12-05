@@ -5,8 +5,8 @@ import arrow.core.raise.either
 import arrow.core.raise.ensureNotNull
 import com.codepunk.moviepunk.data.mapper.toApiStatus
 import com.codepunk.moviepunk.data.remote.response.ApiStatusResponse
-import com.codepunk.moviepunk.domain.repository.RepoFailure
-import com.codepunk.moviepunk.domain.repository.RepoFailure.*
+import com.codepunk.moviepunk.domain.repository.RepositoryState
+import com.codepunk.moviepunk.domain.repository.RepositoryState.*
 import com.codepunk.moviepunk.util.http.HttpStatus
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -15,35 +15,35 @@ import retrofit2.Response
 
 fun <R> Response<R>.toEither(
     onHeaders: (Headers) -> Unit = {},
-    onFailure: (HttpStatus, String) -> RepoFailure = { httpStatus, _ ->
-        HttpFailure(httpStatus = httpStatus)
+    onFailure: (HttpStatus, String) -> RepositoryState = { httpStatus, _ ->
+        HttpState(httpStatus = httpStatus)
     }
-): Either<RepoFailure, R> = either {
+): Either<RepositoryState, R> = either {
     onHeaders(headers())
     val httpStatus: HttpStatus = HttpStatus.of(code())
     if (isSuccessful) {
         ensureNotNull(body()) {
-            ExceptionFailure(RuntimeException("Body is null"))
+            ExceptionState(RuntimeException("Body is null"))
         }
     } else {
         val errorBodyString = errorBody()?.string()
-        ensureNotNull(errorBodyString) { HttpFailure(httpStatus = httpStatus) }
+        ensureNotNull(errorBodyString) { HttpState(httpStatus = httpStatus) }
         raise(onFailure(httpStatus, errorBodyString))
     }
 }
 
 fun <R> Response<R>.toApiEither(
     onHeaders: (Headers) -> Unit = {}
-): Either<RepoFailure, R> = toEither(
+): Either<RepositoryState, R> = toEither(
     onHeaders = onHeaders,
     onFailure = { httpStatus, errorBodyString ->
         try {
-            ApiFailure(
+            ApiState(
                 httpStatus = httpStatus,
                 apiStatus = Json.decodeFromString<ApiStatusResponse>(errorBodyString).toApiStatus()
             )
         } catch (_: SerializationException) {
-            HttpFailure(httpStatus = httpStatus)
+            HttpState(httpStatus = httpStatus)
         }
     }
 )

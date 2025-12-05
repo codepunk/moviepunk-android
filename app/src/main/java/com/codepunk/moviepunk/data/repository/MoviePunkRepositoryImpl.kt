@@ -1,25 +1,44 @@
 package com.codepunk.moviepunk.data.repository
 
+import android.database.sqlite.SQLiteConstraintException
 import android.net.ConnectivityManager
+import androidx.room.withTransaction
 import arrow.core.Either
+import arrow.core.raise.either
+import com.codepunk.moviepunk.BuildConfig
+import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.CombinedDao
+import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
+import com.codepunk.moviepunk.data.local.dao.GenreDao
+import com.codepunk.moviepunk.data.mapper.toEntity
+import com.codepunk.moviepunk.data.mapper.toModel
+import com.codepunk.moviepunk.data.remote.dto.GenreDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
+import com.codepunk.moviepunk.data.remote.util.toApiEither
+import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MediaType
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
-import com.codepunk.moviepunk.domain.repository.RepoFailure
+import com.codepunk.moviepunk.domain.repository.RepositoryState
+import com.codepunk.moviepunk.domain.repository.RepositoryState.ExceptionState
+import com.codepunk.moviepunk.util.extension.isConnected
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import java.io.IOException
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
 class MoviePunkRepositoryImpl(
     private val connectivityManager: ConnectivityManager,
     private val ioDispatcher: CoroutineDispatcher,
-    /*
-    private val curatedContentDao: CuratedContentDao,
     private val db: MoviePunkDatabase,
+    private val combinedDao: CombinedDao,
+    private val curatedContentDao: CuratedContentDao,
     private val genreDao: GenreDao,
-    private val movieDao: MovieDao,
     private val webservice: MoviePunkWebservice,
+    /*
+    private val movieDao: MovieDao,
     private val trendingMoviePagerFactory: TrendingMoviePagerFactory,
      */
     private val webScraper: WebScraper
@@ -27,100 +46,104 @@ class MoviePunkRepositoryImpl(
 
     // region Methods
 
-    /*
-    override suspend fun syncGenresNew(): Either<RepoFailure, Boolean> =
-        networkBoundResultOld<
-                List<GenreEntity>,
-                Map<MediaType, Response<GenreListResponse>>,
-                Either<RepoFailure, Boolean>
-        >(
-            query = { genreDao.getAll() },
-            fetch = {
-                mapOf(
-                    MOVIE to webservice.fetchGenres(MOVIE),
-                    TV to webservice.fetchGenres(TV)
-                )
-            },
-            saveFetchResult = { result ->
-                either {
-                    val movieGenreDtos = result.getValue(MOVIE).toApiEither().bind().genres
-                    val tvGenreDtos = result.getValue(TV).toApiEither().bind().genres
-                    combineToGenreEntities(movieGenreDtos, tvGenreDtos)
-                }.map { entities ->
-                    // This map is basically a transform
-                    db.withTransaction {
-                        genreDao.deleteAll()
-                        genreDao.insertAll(entities)
-                    }.isNotEmpty()
-                }.apply {
-                    this
-                }
-            },
-            shouldFetch = {
-                // THIS method needs to be able to stop the proceedings and signal an error
-                true
-            },
-            transform = { entities -> false.right() }
-        )
-     */
-
-    /*
-     * This is a tricky method because we kind of need to fetch and save ALL genres first
-     * (so we know which ones are moves, tv etc.) before we can return just the movies, for example
-     */
-    private suspend fun getGenres(type: MediaType): Either<RepoFailure, List<Genre>> = TODO()
-
-    /*
-    override fun syncGenres(): Flow<Either<RepoFailure, Boolean>> {
+    override suspend fun syncGenres(): Either<RepositoryState, Boolean> {
         var dataUpdated = false
-        return networkBoundResource(
-            coroutineContext = ioDispatcher,
+        return networkBoundResult(
             query = { genreDao.getAll() },
             fetch = {
-                mapOf(
-                    MOVIE to webservice.fetchGenres(MOVIE),
-                    TV to webservice.fetchGenres(TV)
-                )
-            },
-            saveFetchResult = { result ->
-                dataUpdated = either {
-                    val movieGenreDtos = result.getValue(MOVIE).toApiEither().bind().genres
-                    val tvGenreDtos = result.getValue(TV).toApiEither().bind().genres
-                    combineToGenreEntities(movieGenreDtos, tvGenreDtos)
-                }.onLeft { failure ->
-                    emit(failure.left())
-                }.onRight { entities ->
-                    // Here, we updated the data
-                    db.withTransaction {
-                        genreDao.deleteAll()
-                        genreDao.insertAll(entities)
-                    }.isNotEmpty()
-                }.fold(
-                    ifLeft = { false },
-                    ifRight = { it.isNotEmpty() }
-                )
+                if (!connectivityManager.isConnected) {
+                    raise(RepositoryState.NoConnectivityState)
+                }
+                val movieGenres = webservice.fetchGenres(MediaType.MOVIE)
+                    .toApiEither().bind().genres
+                    .map { it.copy(mediaTypes = listOf(MediaType.MOVIE)) }
+                val tvGenres = webservice.fetchGenres(MediaType.TV)
+                    .toApiEither().bind().genres
+                    .map { it.copy(mediaTypes = listOf(MediaType.TV)) }
+                (movieGenres + tvGenres)
+                    .groupBy { dto ->
+                        dto.id
+                    }.map { (id, dtos) ->
+                        GenreDto(
+                            id = id,
+                            name = dtos.firstOrNull()?.name.orEmpty(),
+                            mediaTypes = dtos.map { it.mediaTypes }.flatten()
+                        )
+                    }
             },
             shouldFetch = { entities ->
-                when {
-                    !connectivityManager.isConnected -> {
-                        emit(NoConnectivityFailure.left())
-                        false
-                    }
-                    entities.isEmpty() -> true
-                    else -> {
-                        val duration = BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
-                        val oldest = entities.minBy { it.createdAt }
-                        Clock.System.now() - oldest.createdAt > duration
-                    }
+                entities.isEmpty() || entities.minBy { it.genre.createdAt }.let { oldest ->
+                    Clock.System.now() - oldest.genre.createdAt >
+                            BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
                 }
             },
-            shouldEmitInitialData = { false },
-            transform = { dataUpdated.right() }
+            saveFetchResult = { dtos ->
+                dataUpdated = try {
+                    db.withTransaction {
+                        genreDao.deleteAll()
+                        combinedDao.insertAll(
+                            dtos.map { it.toEntity() }
+                        )
+                        true
+                    }
+                } catch (e: SQLiteConstraintException) {
+                    raise(ExceptionState(e))
+                }
+            },
+            transform = { dataUpdated }
         )
     }
-     */
 
-    override fun syncCuratedContent(): Flow<Either<RepoFailure, Boolean>> = flow {
+    override fun getGenres(): Flow<List<Genre>> = genreDao.getAll().map { entities ->
+        entities.map { it.toModel() }
+    }
+
+    override suspend fun syncCuratedContent(): Either<RepositoryState, Boolean> {
+        var networkCssHref = ""
+        var dataUpdated = false
+        return networkBoundResult(
+            query = { curatedContentDao.getAll() },
+            fetch = {
+                webScraper.scrapeUrlForCuratedContent(
+                    baseUrl = BuildConfig.TMDB_URL,
+                    cssHref = networkCssHref
+                ).toApiEither().bind().content
+            },
+            shouldFetch = { content ->
+                either {
+                    // Get the CSS href for curated content
+                    networkCssHref = try {
+                        webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
+                    } catch (e: Exception) {
+                        raise(ExceptionState(e))
+                    } ?: raise(
+                        ExceptionState(IOException(CSS_MESSAGE))
+                    )
+
+                    // Check whether the network uses a new href
+                    val cachedCssHref = content.firstOrNull()?.href
+                    cachedCssHref != networkCssHref
+                }.fold(
+                    ifLeft = { raise(it) },
+                    ifRight = { true }
+                )
+            },
+            saveFetchResult = { dtos ->
+                dataUpdated = try {
+                    db.withTransaction {
+                        curatedContentDao.deleteAll()
+                        curatedContentDao.insertAll(
+                            dtos.map { it.toEntity() }
+                        )
+                        true
+                    }
+                } catch (e: SQLiteConstraintException) {
+                    raise(ExceptionState(e))
+                }
+            },
+            transform = { dataUpdated }
+        ).apply { this }
+    }
         /*
         var networkCssHref = ""
         var dataUpdated = false
@@ -176,7 +199,7 @@ class MoviePunkRepositoryImpl(
             transform = { dataUpdated.right() }
         )
          */
-    }
+    //}
 
     /*
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {

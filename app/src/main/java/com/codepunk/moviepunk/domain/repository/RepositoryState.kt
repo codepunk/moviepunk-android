@@ -3,22 +3,24 @@ package com.codepunk.moviepunk.domain.repository
 import com.codepunk.moviepunk.domain.model.ApiStatus
 import com.codepunk.moviepunk.util.http.HttpStatus
 
-sealed interface RepoFailure {
+sealed interface RepositoryState {
 
-    object NoConnectivityFailure : RepoFailure {
-        override fun toString(): String {
-            return "NoConnectivityFailure"
-        }
+    object UninitializedState : RepositoryState {
+        override fun toString(): String = "UninitializedStatus"
     }
 
-    open class HttpFailure(
+    object NoConnectivityState : RepositoryState {
+        override fun toString(): String = "NoConnectivityFailure"
+    }
+
+    open class HttpState(
         val httpStatus: HttpStatus
-    ) : RepoFailure {
+    ) : RepositoryState {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
 
-            other as HttpFailure
+            other as HttpState
 
             return httpStatus == other.httpStatus
         }
@@ -32,10 +34,10 @@ sealed interface RepoFailure {
         }
     }
 
-    class ApiFailure(
+    class ApiState(
         httpStatus: HttpStatus,
         val apiStatus: ApiStatus
-    ) : HttpFailure(
+    ) : HttpState(
         httpStatus = httpStatus
     ) {
         override fun equals(other: Any?): Boolean {
@@ -43,7 +45,7 @@ sealed interface RepoFailure {
             if (javaClass != other?.javaClass) return false
             if (!super.equals(other)) return false
 
-            other as ApiFailure
+            other as ApiState
 
             return apiStatus == other.apiStatus
         }
@@ -59,14 +61,14 @@ sealed interface RepoFailure {
         }
     }
 
-    class ExceptionFailure(
+    class ExceptionState(
         val exception: Exception
-    ) : RepoFailure {
+    ) : RepositoryState {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
 
-            other as ExceptionFailure
+            other as ExceptionState
 
             return exception == other.exception
         }

@@ -1,6 +1,7 @@
 package com.codepunk.moviepunk.domain.repository
 
 import arrow.core.Either
+import com.codepunk.moviepunk.domain.model.Genre
 import kotlinx.coroutines.flow.Flow
 
 interface MoviePunkRepository {
@@ -9,11 +10,13 @@ interface MoviePunkRepository {
 
     /*
     suspend fun syncGenresNew(): Either<RepoFailure, Boolean>
-
-    fun syncGenres(): Flow<Either<RepoFailure, Boolean>>
      */
 
-    fun syncCuratedContent(): Flow<Either<RepoFailure, Boolean>>
+    suspend fun syncGenres(): Either<RepositoryState, Boolean>
+
+    fun getGenres(): Flow<List<Genre>>
+
+    suspend fun syncCuratedContent(): Either<RepositoryState, Boolean>
 
     /*
     fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>

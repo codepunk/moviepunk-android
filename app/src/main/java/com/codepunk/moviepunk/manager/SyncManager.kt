@@ -1,16 +1,18 @@
 package com.codepunk.moviepunk.manager
 
+import arrow.core.Either
+import arrow.core.left
 import com.codepunk.moviepunk.di.qualifier.ApplicationScope
 import com.codepunk.moviepunk.di.qualifier.DefaultDispatcher
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
+import com.codepunk.moviepunk.domain.repository.RepositoryState
+import com.codepunk.moviepunk.domain.repository.RepositoryState.UninitializedState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 // TODO When are we "done"? Maybe a bunch of flows for each sync and one "master" flow
@@ -23,18 +25,27 @@ class SyncManager @Inject constructor(
     networkConnectionManager: NetworkConnectionManager,
     private val repository: MoviePunkRepository
 ) {
-    private val _completeFlow: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val completeFlow: StateFlow<Boolean> = _completeFlow.asStateFlow()
-
     // TODO Make flows that track when each sync is complete. Is there a way to have a retry
     //  on those syncs if they fail?
+
+    private val _syncGenresFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+        MutableStateFlow(UninitializedState.left())
+    val syncGenresFlow = _syncGenresFlow.asStateFlow()
+
+    private val _syncCuratedContentFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+        MutableStateFlow(UninitializedState.left())
+    val syncCuratedContentFlow = _syncCuratedContentFlow.asStateFlow()
 
     init {
         applicationScope.launch(defaultDispatcher) {
             networkConnectionManager.connectionStateFlow.collect { isConnected ->
                 if (isConnected) {
-                    syncGenres()
-                    syncCuratedContent()
+                    if (syncGenresFlow.value.isLeft()) {
+                        syncGenres()
+                    }
+                    if (syncCuratedContentFlow.value.isLeft()) {
+                        syncCuratedContent()
+                    }
                 }
             }
         }
@@ -42,19 +53,13 @@ class SyncManager @Inject constructor(
 
     private fun syncGenres() {
         applicationScope.launch(ioDispatcher) {
-            /*
-            repository.syncGenres().collect {
-                Timber.i("syncGenres result=$it")
-            }
-             */
+            _syncGenresFlow.value = repository.syncGenres()
         }
     }
 
     private fun syncCuratedContent() {
         applicationScope.launch(ioDispatcher) {
-            repository.syncCuratedContent().collect {
-                Timber.i("syncCuratedContent result=$it")
-            }
+            _syncCuratedContentFlow.value = repository.syncCuratedContent()
         }
     }
 }

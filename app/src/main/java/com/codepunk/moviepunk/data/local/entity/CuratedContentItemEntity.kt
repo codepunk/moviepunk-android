@@ -6,16 +6,20 @@ import androidx.room.PrimaryKey
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-@Entity(tableName = "genre")
-data class GenreEntity constructor(
-    @PrimaryKey(autoGenerate = false)
-    val id: Int,
+@Entity(tableName = "curated_content")
+data class CuratedContentItemEntity(
 
-    val name: String,
+    @PrimaryKey(autoGenerate = false)
+    val id: Int = 0,
+
+    val href: String = "",
+
+    val url: String = "",
 
     @ColumnInfo(name = "created_at")
     val createdAt: Instant = Clock.System.now(),
 
     @ColumnInfo(name = "updated_at")
     val updatedAt: Instant = createdAt
+
 )

@@ -3,14 +3,9 @@ package com.codepunk.moviepunk.di.module
 import android.content.Context
 import androidx.room.Room
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
-/*
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
-import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
-import com.codepunk.moviepunk.data.local.dao.MovieDao
-import com.codepunk.moviepunk.data.local.dao.TrendingMovieDao
-import com.codepunk.moviepunk.data.local.dao.TrendingMovieRemoteKeyDao
- */
+import com.codepunk.moviepunk.data.local.dao.GenreMediaTypeDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,7 +28,6 @@ object LocalModule {
             name = "moviepunk_db"
         ).build()
 
-    /*
     @Provides
     @Singleton
     fun provideCuratedContentDao(
@@ -44,6 +38,12 @@ object LocalModule {
     @Singleton
     fun provideGenreDao(database: MoviePunkDatabase): GenreDao = database.genreDao()
 
+    @Provides
+    @Singleton
+    fun provideGenreMediaTypeDao(database: MoviePunkDatabase): GenreMediaTypeDao =
+        database.genreMediaTypeDao()
+
+    /*
     @Provides
     @Singleton
     fun provideMovieDao(database: MoviePunkDatabase): MovieDao = database.movieDao()
