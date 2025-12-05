@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.MoviePunk.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/tmdb_logo_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/tmdb_logo_shimmer</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.MoviePunk</item>
     </style>
