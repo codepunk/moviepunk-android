@@ -144,62 +144,6 @@ class MoviePunkRepositoryImpl(
             transform = { dataUpdated }
         ).apply { this }
     }
-        /*
-        var networkCssHref = ""
-        var dataUpdated = false
-        return networkBoundResource(
-            coroutineContext = ioDispatcher,
-            query = { curatedContentDao.getAll() },
-            fetch = {
-                webScraper.scrapeUrlForCuratedContent(
-                    baseUrl = BuildConfig.TMDB_URL,
-                    cssHref = networkCssHref
-                )
-            },
-            saveFetchResult = {result ->
-                dataUpdated = either {
-                    result.toApiEither().bind().content.map { it.toCuratedContentItemEntity() }
-                }.onLeft { failure ->
-                    emit(failure.left())
-                }.onRight { entities ->
-                    // Here, we updated the data
-                    db.withTransaction {
-                        curatedContentDao.deleteAll()
-                        curatedContentDao.insertAll(entities)
-                    }.isNotEmpty()
-                }.fold(
-                    ifLeft = { false },
-                    ifRight = { it.isNotEmpty() }
-                )
-            },
-            shouldFetch = { content ->
-                if (!connectivityManager.isConnected) {
-                    emit(NoConnectivityFailure.left())
-                    false
-                } else {
-                    either {
-                        // Get the CSS href for curated content
-                        networkCssHref = try {
-                            webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
-                        } catch (e: Exception) {
-                            raise(ExceptionFailure(e))
-                        } ?: raise(
-                            ExceptionFailure(IOException(CSS_MESSAGE))
-                        )
-
-                        // Check whether the network uses a new href
-                        val localCssHref = content.firstOrNull()?.href.orEmpty()
-                        localCssHref != networkCssHref
-                    }.onLeft {
-                        emit(it.left())
-                    }.getOrElse { false }
-                }
-            },
-            shouldEmitInitialData = { false },
-            transform = { dataUpdated.right() }
-        )
-         */
-    //}
 
     /*
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
