@@ -41,13 +41,13 @@
                             android:type="linear">
                             <item
                                 android:color="#00FFFFFF"
-                                android:offset="0.35" />
+                                android:offset="0" />
                             <item
                                 android:color="#6DFFFFFF"
                                 android:offset="0.5" />
                             <item
                                 android:color="#00FFFFFF"
-                                android:offset="0.65" />
+                                android:offset="1" />
                         </gradient>
                     </aapt:attr>
                 </path>
@@ -60,12 +60,12 @@
     <target android:name="shimmer_clip">
         <aapt:attr name="android:animation">
             <objectAnimator
-                android:duration="1500"
+                android:duration="3000"
                 android:interpolator="@android:anim/linear_interpolator"
                 android:propertyName="pathData"
                 android:repeatCount="infinite"
-                android:valueFrom="M -48, 0 L 0, 0 L -48, 192 L -96, 192 Z"
-                android:valueTo="M 192, 0 L 240, 0 L 144, 192 L 96, 192 Z"
+                android:valueFrom="M -48, 0 L 0, 0 L -192, 192 L -240, 192 Z"
+                android:valueTo="M 768, 0 L 816, 0 L 624, 192 L 576, 192 Z"
                 android:valueType="pathType" />
         </aapt:attr>
     </target>
