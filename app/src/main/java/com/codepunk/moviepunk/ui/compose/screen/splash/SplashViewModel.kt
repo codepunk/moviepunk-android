@@ -66,7 +66,7 @@ class SplashViewModel @Inject constructor(
 
         // region Constants
 
-        private const val MINIMUM_SPLASH_TIME = 1500L
+        private const val MINIMUM_SPLASH_TIME = 2500L
 
         private const val MAXIMUM_SPLASH_TIME = 3500L
 
