@@ -16,6 +16,7 @@ import com.codepunk.moviepunk.data.remote.dto.GenreDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
+import com.codepunk.moviepunk.domain.model.CuratedContentItem
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MediaType
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
@@ -152,6 +153,17 @@ class MoviePunkRepositoryImpl(
             )
         }
     }
+
+    override suspend fun getCuratedContent(
+        currentId: Int
+    ): Either<RepositoryState, CuratedContentItem?> =
+        either {
+            try {
+                curatedContentDao.getRandom(currentId)?.toModel()
+            } catch (e: Exception) {
+                raise(ExceptionState(e))
+            }
+        }
 
     /*
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {

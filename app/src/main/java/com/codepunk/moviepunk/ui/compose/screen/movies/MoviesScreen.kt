@@ -1,17 +1,19 @@
 package com.codepunk.moviepunk.ui.compose.screen.movies
 
-import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -35,7 +37,7 @@ fun MoviesScreen(
     trendingMovies: LazyPagingItems<Movie>,
     modifier: Modifier = Modifier,
     @Suppress("unused")
-    onIntent: (MoviesIntent) -> Unit = {}
+    sendIntent: (MoviesIntent) -> Unit = {}
 ) {
     LaunchedEffect(key1 = trendingMovies.loadState) {
         /*
@@ -48,14 +50,23 @@ fun MoviesScreen(
 
     Timber.d("curatedContentItem = ${state.curatedContentItem}")
 
+    val pullToRefreshState: PullToRefreshState = rememberPullToRefreshState()
+
     val configuration = LocalConfiguration.current
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
 
     Box(
         modifier = modifier.fillMaxSize()
+            .pullToRefresh(
+                state = pullToRefreshState,
+                isRefreshing = state.isLoadingAny,
+                onRefresh = {
+                    sendIntent(MoviesIntent.RefreshIntent)
+                }
+            )
     ) {
-        if (trendingMovies.loadState.refresh is LoadState.Loading) {
+        if (false /*trendingMovies.loadState.refresh is LoadState.Loading*/) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -77,30 +88,7 @@ fun MoviesScreen(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .then(
-                                        // TODO This is messy but it works for now. Need to find a cleaner way.
-                                        when {
-                                            configuration.orientation == Configuration.ORIENTATION_LANDSCAPE -> {
-                                                Modifier.height(
-                                                    with(density) {
-                                                        windowInfo.containerSize.height.toDp()
-                                                    }
-                                                )
-                                            }
-                                            painter.intrinsicSize.isUnspecified -> {
-                                                Modifier.height(
-                                                    with(density) {
-                                                        windowInfo.containerSize.width.times(880f / 600f).toDp()
-                                                    }
-                                                )
-                                            }
-                                            else -> {
-                                                Modifier.aspectRatio(
-                                                    painter.intrinsicSize.width / painter.intrinsicSize.height
-                                                )
-                                            }
-                                        }
-                                    )
+                                    .aspectRatio(880f / 600f)
                             )
                         }
                     )
@@ -132,6 +120,12 @@ fun MoviesScreen(
                 }
             }
         }
+
+        Indicator(
+            modifier = Modifier.align(Alignment.TopCenter),
+            isRefreshing = state.isLoadingAny,
+            state = pullToRefreshState
+        )
     }
 }
 

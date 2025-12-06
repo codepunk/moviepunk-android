@@ -37,8 +37,13 @@ interface CuratedContentDao {
     @Query("SELECT min(created_at) FROM curated_content")
     suspend fun getOldest(): Instant
 
-    @Query("SELECT * FROM curated_content ORDER BY RANDOM() LIMIT 1")
-    suspend fun getRandom(): CuratedContentItemEntity?
+    @Query("""
+          SELECT * 
+            FROM curated_content 
+           WHERE id != :currentId
+        ORDER BY RANDOM() LIMIT 1
+    """)
+    suspend fun getRandom(currentId: Int): CuratedContentItemEntity?
 
     // endregion Methods
 

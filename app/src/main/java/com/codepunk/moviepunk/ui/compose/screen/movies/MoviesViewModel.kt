@@ -41,9 +41,7 @@ class MoviesViewModel @Inject constructor(
 
     init {
         monitorNetworkConnection()
-        getCuratedContent()
-//        getGenres()
-        getTrendingMovies()
+        refresh()
     }
 
     // endregion Constructors
@@ -60,7 +58,24 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    fun getCuratedContent() {
+    private fun refresh() {
+        getCuratedContent()
+//        getGenres()
+        getTrendingMovies()
+    }
+
+    private fun getCuratedContent() {
+        viewModelScope.launch(ioDispatcher) {
+            state = state.copy(curatedContentLoading = true)
+            val currentId = state.curatedContentItem?.id ?: 0
+            val result = repository.getCuratedContent(currentId)
+            state = state.copy(curatedContentLoading = false)
+            result.onRight { curatedContentItem ->
+                state = state.copy(
+                    curatedContentItem = curatedContentItem
+                )
+            }
+        }
         /*
         state = state.copy(
             curatedContentLoading = true
@@ -95,7 +110,7 @@ class MoviesViewModel @Inject constructor(
     }
      */
 
-    fun getTrendingMovies() {
+    private fun getTrendingMovies() {
         /*
         trendingMoviesFlow = repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
          */
@@ -103,7 +118,8 @@ class MoviesViewModel @Inject constructor(
 
     override fun handleIntent(intent: MoviesIntent) {
         when (intent) {
-            is MoviesIntent.TestIntent -> sendMessage(MoviesMessage.TestMessage)
+            MoviesIntent.RefreshIntent -> refresh()
+            MoviesIntent.TestIntent -> sendMessage(MoviesMessage.TestMessage)
         }
     }
 

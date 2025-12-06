@@ -6,6 +6,7 @@ import com.codepunk.moviepunk.domain.repository.RepositoryState
 
 data class MoviesState(
     val isConnected: Boolean = false,
+    val isLoadingAny: Boolean = false,
     val curatedContentLoading: Boolean = false,
     val curatedContentItem: CuratedContentItem? = null,
     val curatedContentError: RepositoryState? = null,
