@@ -10,13 +10,11 @@ import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
-import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Singleton
 
 @Module
@@ -36,7 +34,6 @@ class DataModule {
     @Provides
     fun provideMoviePunkRepository(
         connectivityManager: ConnectivityManager,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher,
         db: MoviePunkDatabase,
         combinedDao: CombinedDao,
         curatedContentDao: CuratedContentDao,
@@ -48,7 +45,6 @@ class DataModule {
         webScraper: WebScraper
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         connectivityManager = connectivityManager,
-        ioDispatcher = ioDispatcher,
         db = db,
         combinedDao = combinedDao,
         curatedContentDao = curatedContentDao,

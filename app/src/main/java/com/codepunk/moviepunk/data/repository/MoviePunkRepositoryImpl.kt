@@ -22,16 +22,15 @@ import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import com.codepunk.moviepunk.domain.repository.RepositoryState
 import com.codepunk.moviepunk.domain.repository.RepositoryState.ExceptionState
 import com.codepunk.moviepunk.util.extension.isConnected
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import kotlin.collections.map
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
 class MoviePunkRepositoryImpl(
     private val connectivityManager: ConnectivityManager,
-    private val ioDispatcher: CoroutineDispatcher,
     private val db: MoviePunkDatabase,
     private val combinedDao: CombinedDao,
     private val curatedContentDao: CuratedContentDao,
@@ -48,50 +47,57 @@ class MoviePunkRepositoryImpl(
 
     override suspend fun syncGenres(): Either<RepositoryState, Boolean> {
         var dataUpdated = false
-        return networkBoundResult(
-            query = { genreDao.getAll() },
-            fetch = {
-                if (!connectivityManager.isConnected) {
-                    raise(RepositoryState.NoConnectivityState)
-                }
-                val movieGenres = webservice.fetchGenres(MediaType.MOVIE)
-                    .toApiEither().bind().genres
-                    .map { it.copy(mediaTypes = listOf(MediaType.MOVIE)) }
-                val tvGenres = webservice.fetchGenres(MediaType.TV)
-                    .toApiEither().bind().genres
-                    .map { it.copy(mediaTypes = listOf(MediaType.TV)) }
-                (movieGenres + tvGenres)
-                    .groupBy { dto ->
-                        dto.id
-                    }.map { (id, dtos) ->
-                        GenreDto(
-                            id = id,
-                            name = dtos.firstOrNull()?.name.orEmpty(),
-                            mediaTypes = dtos.map { it.mediaTypes }.flatten()
-                        )
+        return either {
+            networkBoundResource(
+                query = { genreDao.getAll() },
+                fetch = {
+                    if (!connectivityManager.isConnected) {
+                        raise(RepositoryState.NoConnectivityState)
                     }
-            },
-            shouldFetch = { entities ->
-                entities.isEmpty() || entities.minBy { it.genre.createdAt }.let { oldest ->
-                    Clock.System.now() - oldest.genre.createdAt >
-                            BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
-                }
-            },
-            saveFetchResult = { dtos ->
-                dataUpdated = try {
-                    db.withTransaction {
-                        genreDao.deleteAll()
-                        combinedDao.insertAll(
-                            dtos.map { it.toEntity() }
-                        )
+                    val movieGenres = webservice.fetchGenres(MediaType.MOVIE)
+                        .toApiEither().bind().genres
+                        .map { it.copy(mediaTypes = listOf(MediaType.MOVIE)) }
+                    val tvGenres = webservice.fetchGenres(MediaType.TV)
+                        .toApiEither().bind().genres
+                        .map { it.copy(mediaTypes = listOf(MediaType.TV)) }
+                    (movieGenres + tvGenres)
+                        .groupBy { dto ->
+                            dto.id
+                        }.map { (id, dtos) ->
+                            GenreDto(
+                                id = id,
+                                name = dtos.firstOrNull()?.name.orEmpty(),
+                                mediaTypes = dtos.map { it.mediaTypes }.flatten()
+                            )
+                        }
+                },
+                shouldFetch = { entities ->
+                    if (entities.isEmpty()) {
                         true
+                    } else {
+                        val oldest = entities.minBy { it.genre.createdAt }.genre.createdAt
+                        val now = Clock.System.now()
+                        now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
                     }
-                } catch (e: SQLiteConstraintException) {
-                    raise(ExceptionState(e))
+                },
+                saveFetchResult = { dtos ->
+                    dataUpdated = try {
+                        db.withTransaction {
+                            genreDao.deleteAll()
+                            combinedDao.insertAll(
+                                dtos.map { it.toEntity() }
+                            )
+                            true
+                        }
+                    } catch (e: SQLiteConstraintException) {
+                        raise(ExceptionState(e))
+                    }
+                },
+                transform = { entities ->
+                    entities.map { it.toModel() }
                 }
-            },
-            transform = { dataUpdated }
-        )
+            )
+        }.map { dataUpdated }
     }
 
     override fun getGenres(): Flow<List<Genre>> = genreDao.getAll().map { entities ->
@@ -101,48 +107,50 @@ class MoviePunkRepositoryImpl(
     override suspend fun syncCuratedContent(): Either<RepositoryState, Boolean> {
         var networkCssHref = ""
         var dataUpdated = false
-        return networkBoundResult(
-            query = { curatedContentDao.getAll() },
-            fetch = {
-                webScraper.scrapeUrlForCuratedContent(
-                    baseUrl = BuildConfig.TMDB_URL,
-                    cssHref = networkCssHref
-                ).toApiEither().bind().content
-            },
-            shouldFetch = { content ->
-                either {
-                    // Get the CSS href for curated content
-                    networkCssHref = try {
-                        webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
-                    } catch (e: Exception) {
-                        raise(ExceptionState(e))
-                    } ?: raise(
-                        ExceptionState(IOException(CSS_MESSAGE))
-                    )
-
-                    // Check whether the network uses a new href
-                    val cachedCssHref = content.firstOrNull()?.href
-                    cachedCssHref != networkCssHref
-                }.fold(
-                    ifLeft = { raise(it) },
-                    ifRight = { true }
-                )
-            },
-            saveFetchResult = { dtos ->
-                dataUpdated = try {
-                    db.withTransaction {
-                        curatedContentDao.deleteAll()
-                        curatedContentDao.insertAll(
-                            dtos.map { it.toEntity() }
+        return either {
+            networkBoundResource(
+                query = { curatedContentDao.getAll() },
+                fetch = {
+                    webScraper.scrapeUrlForCuratedContent(
+                        baseUrl = BuildConfig.TMDB_URL,
+                        cssHref = networkCssHref
+                    ).toApiEither().bind().content
+                },
+                shouldFetch = { content ->
+                    either {
+                        // Get the CSS href for curated content
+                        networkCssHref = try {
+                            webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
+                        } catch (e: Exception) {
+                            raise(ExceptionState(e))
+                        } ?: raise(
+                            ExceptionState(IOException(CSS_MESSAGE))
                         )
-                        true
+
+                        // Check whether the network uses a new href
+                        val cachedCssHref = content.firstOrNull()?.href
+                        cachedCssHref != networkCssHref
+                    }.fold(
+                        ifLeft = { raise(it) },
+                        ifRight = { true }
+                    )
+                },
+                saveFetchResult = { dtos ->
+                    dataUpdated = try {
+                        db.withTransaction {
+                            curatedContentDao.deleteAll()
+                            curatedContentDao.insertAll(
+                                dtos.map { it.toEntity() }
+                            )
+                            true
+                        }
+                    } catch (e: SQLiteConstraintException) {
+                        raise(ExceptionState(e))
                     }
-                } catch (e: SQLiteConstraintException) {
-                    raise(ExceptionState(e))
-                }
-            },
-            transform = { dataUpdated }
-        ).apply { this }
+                },
+                transform = { dataUpdated }
+            )
+        }
     }
 
     /*
