@@ -173,10 +173,6 @@ class MoviePunkRepositoryImpl(
                 pagingData.map { it.toMovie() }
             }
     }
-
-    override fun getRandomCuratedContentItem(): Flow<Either<RepoFailure, CuratedContentItem?>> = flow {
-        // TODO NEXT ("Not yet implemented")
-    }
      */
 
     // endregion Methods

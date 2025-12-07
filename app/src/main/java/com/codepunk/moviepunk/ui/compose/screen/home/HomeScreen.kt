@@ -1,7 +1,9 @@
 package com.codepunk.moviepunk.ui.compose.screen.home
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
@@ -43,63 +45,73 @@ fun HomeScreen(
         }
     }
 
-    NavigationSuiteScaffold(
-        modifier = Modifier.fillMaxSize(),
-        navigationSuiteItems = {
-            HomeNavItem.entries.map { navItem ->
-                item(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = navItem.iconRes),
-                            contentDescription = stringResource(id = navItem.contentDescriptionRes)
-                        )
-                    },
-                    label = { Text(text = stringResource(id = navItem.labelRes)) },
-                    selected = currentNavItem == navItem,
-                    onClick = {
-                        currentNavItem = navItem
-                        viewModel.sendIntent(navItem.intent)
-                    }
-                )
-            }
+
+
+    Scaffold(
+        topBar = {
+            HomeTopAppBar()
         }
-    ) {
-        NavHost(
-            modifier = modifier,
-            navController = navController,
-            startDestination = Route.Movies
+    ) { paddingValues ->
+        NavigationSuiteScaffold(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
+            navigationSuiteItems = {
+                HomeNavItem.entries.map { navItem ->
+                    item(
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = navItem.iconRes),
+                                contentDescription = stringResource(id = navItem.contentDescriptionRes)
+                            )
+                        },
+                        label = { Text(text = stringResource(id = navItem.labelRes)) },
+                        selected = currentNavItem == navItem,
+                        onClick = {
+                            currentNavItem = navItem
+                            viewModel.sendIntent(navItem.intent)
+                        }
+                    )
+                }
+            }
         ) {
-            composable<Route.Movies> {
-                val viewModel: MoviesViewModel = hiltViewModel()
+            NavHost(
+                modifier = modifier,
+                navController = navController,
+                startDestination = Route.Movies
+            ) {
+                composable<Route.Movies> {
+                    val viewModel: MoviesViewModel = hiltViewModel()
 
-                LaunchedEffect(Unit) {
-                    viewModel.messageFlow.collect { message ->
-                        Timber.d("Received message: $message")
+                    LaunchedEffect(Unit) {
+                        viewModel.messageFlow.collect { message ->
+                            Timber.d("Received message: $message")
+                        }
+                    }
+
+                    val state = viewModel.stateFlow.collectAsStateWithLifecycle()
+                    val trendingMovies = viewModel.trendingMoviesFlow.collectAsLazyPagingItems()
+
+                    MoviesScreen(
+                        state = state.value,
+                        trendingMovies = trendingMovies,
+                        modifier = modifier
+                    ) { intent ->
+                        viewModel.sendIntent(intent)
                     }
                 }
 
-                val state = viewModel.stateFlow.collectAsStateWithLifecycle()
-                val trendingMovies = viewModel.trendingMoviesFlow.collectAsLazyPagingItems()
-
-                MoviesScreen(
-                    state = state.value,
-                    trendingMovies = trendingMovies,
-                    modifier = modifier
-                ) { intent ->
-                    viewModel.sendIntent(intent)
+                composable<Route.TvShows> {
+                    TvShowsScreen()
                 }
-            }
 
-            composable<Route.TvShows> {
-                TvShowsScreen()
-            }
+                composable<Route.People> {
+                    PeopleScreen()
+                }
 
-            composable<Route.People> {
-                PeopleScreen()
-            }
-
-            composable<Route.HomeMore> {
-                HomeMoreScreen()
+                composable<Route.HomeMore> {
+                    HomeMoreScreen()
+                }
             }
         }
     }
