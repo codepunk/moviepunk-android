@@ -17,6 +17,7 @@ import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.domain.model.CuratedContentItem
+import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MediaType
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
@@ -105,27 +106,30 @@ class MoviePunkRepositoryImpl(
         entities.map { it.toModel() }
     }
 
-    override suspend fun syncCommunityContent(): Either<RepositoryState, Boolean> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun syncFeaturedContent(): Either<RepositoryState, Boolean> {
-        var networkCssHref = ""
+    override suspend fun syncCuratedContent(
+        curatedContentType: CuratedContentType
+    ): Either<RepositoryState, Boolean> {
+        lateinit var cssHref: String
         var dataUpdated = false
         return either {
             networkBoundResource(
                 query = { curatedContentDao.getAll() },
                 fetch = {
-                    webScraper.scrapeUrlForFeaturedContent(
+                    webScraper.scrapeUrlForContent(
                         baseUrl = BuildConfig.TMDB_URL,
-                        cssHref = networkCssHref
+                        cssHref = cssHref,
+                        curatedContentType = curatedContentType
                     ).toApiEither().bind().content
                 },
                 shouldFetch = { content ->
                     either {
                         // Get the CSS href for curated content
-                        networkCssHref = try {
-                            webScraper.scrapeUrlForIndexCssHref(BuildConfig.TMDB_URL)
+                        cssHref = try {
+                            val isMobile = (curatedContentType == CuratedContentType.FEATURED)
+                            webScraper.scrapeUrlForIndexCssHref(
+                                urlString = BuildConfig.TMDB_URL,
+                                isMobile = isMobile
+                            )
                         } catch (e: Exception) {
                             raise(ExceptionState(e))
                         } ?: raise(
@@ -134,7 +138,7 @@ class MoviePunkRepositoryImpl(
 
                         // Check whether the network uses a new href
                         val cachedCssHref = content.firstOrNull()?.href
-                        cachedCssHref != networkCssHref
+                        cachedCssHref != cssHref
                     }.fold(
                         ifLeft = { raise(it) },
                         ifRight = { true }
@@ -143,7 +147,7 @@ class MoviePunkRepositoryImpl(
                 saveFetchResult = { dtos ->
                     dataUpdated = try {
                         db.withTransaction {
-                            curatedContentDao.deleteAll()
+                            curatedContentDao.deleteAll(curatedContentType.value)
                             curatedContentDao.insertAll(
                                 dtos.map { it.toEntity() }
                             )

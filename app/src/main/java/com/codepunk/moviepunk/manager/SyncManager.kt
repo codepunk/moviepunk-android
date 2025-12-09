@@ -5,6 +5,7 @@ import arrow.core.left
 import com.codepunk.moviepunk.di.qualifier.ApplicationScope
 import com.codepunk.moviepunk.di.qualifier.DefaultDispatcher
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
+import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import com.codepunk.moviepunk.domain.repository.RepositoryState
 import com.codepunk.moviepunk.domain.repository.RepositoryState.UninitializedState
@@ -32,9 +33,13 @@ class SyncManager @Inject constructor(
         MutableStateFlow(UninitializedState.left())
     val syncGenresFlow = _syncGenresFlow.asStateFlow()
 
-    private val _syncCuratedContentFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+    private val _syncFeaturedContentFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
         MutableStateFlow(UninitializedState.left())
-    val syncCuratedContentFlow = _syncCuratedContentFlow.asStateFlow()
+    val syncFeaturedContentFlow = _syncFeaturedContentFlow.asStateFlow()
+
+    private val _syncCommunityContentFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+        MutableStateFlow(UninitializedState.left())
+    val syncCommunityContentFlow = _syncCommunityContentFlow.asStateFlow()
 
     init {
         applicationScope.launch(defaultDispatcher) {
@@ -43,8 +48,11 @@ class SyncManager @Inject constructor(
                     if (syncGenresFlow.value.isLeft()) {
                         syncGenres()
                     }
-                    if (syncCuratedContentFlow.value.isLeft()) {
-                        syncCuratedContent()
+                    if (syncFeaturedContentFlow.value.isLeft()) {
+                        syncFeaturedContent()
+                    }
+                    if (syncCommunityContentFlow.value.isLeft()) {
+                        syncCommunityContent()
                     }
                 }
             }
@@ -57,9 +65,17 @@ class SyncManager @Inject constructor(
         }
     }
 
-    private fun syncCuratedContent() {
+    private fun syncFeaturedContent() {
         applicationScope.launch(ioDispatcher) {
-            _syncCuratedContentFlow.value = repository.syncFeaturedContent()
+            _syncFeaturedContentFlow.value =
+                repository.syncCuratedContent(CuratedContentType.FEATURED)
+        }
+    }
+
+    private fun syncCommunityContent() {
+        applicationScope.launch(ioDispatcher) {
+            _syncCommunityContentFlow.value =
+                repository.syncCuratedContent(CuratedContentType.COMMUNITY)
         }
     }
 }

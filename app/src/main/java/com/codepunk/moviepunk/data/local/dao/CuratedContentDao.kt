@@ -24,6 +24,13 @@ interface CuratedContentDao {
     @Query("DELETE FROM curated_content")
     suspend fun deleteAll(): Int
 
+    @Query("""
+        DELETE
+          FROM curated_content 
+         WHERE type = :type
+    """)
+    suspend fun deleteAll(type: String): Int
+
     // ====================
     // Query
     // ====================
