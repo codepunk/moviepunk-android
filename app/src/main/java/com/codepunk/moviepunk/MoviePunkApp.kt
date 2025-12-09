@@ -14,6 +14,10 @@ import javax.inject.Inject
 /**
  * TODO NEXT Ongoing thoughts:
  *   Some next steps:
+ *   * Update CuratedContent DTO, Entity & model with CuratedContentType
+ *   * Update Mappers for above
+ *   * Update the get random curated content method in DAO
+ *
  *   * Scaffolding on MoviesScreen (may have to look into colors, standard sizes etc.)
  *   * Different curated content component sizes for different screen sizes
  *   * "Loading" for curated content background

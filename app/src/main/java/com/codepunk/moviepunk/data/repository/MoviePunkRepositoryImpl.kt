@@ -105,14 +105,18 @@ class MoviePunkRepositoryImpl(
         entities.map { it.toModel() }
     }
 
-    override suspend fun syncCuratedContent(): Either<RepositoryState, Boolean> {
+    override suspend fun syncCommunityContent(): Either<RepositoryState, Boolean> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun syncFeaturedContent(): Either<RepositoryState, Boolean> {
         var networkCssHref = ""
         var dataUpdated = false
         return either {
             networkBoundResource(
                 query = { curatedContentDao.getAll() },
                 fetch = {
-                    webScraper.scrapeUrlForCuratedContent(
+                    webScraper.scrapeUrlForFeaturedContent(
                         baseUrl = BuildConfig.TMDB_URL,
                         cssHref = networkCssHref
                     ).toApiEither().bind().content
@@ -154,7 +158,12 @@ class MoviePunkRepositoryImpl(
         }
     }
 
-    override suspend fun getCuratedContent(
+    override suspend fun getCuratedContent(): Flow<List<CuratedContentItem>> =
+        curatedContentDao.getAll().map { entities ->
+            entities.map { it.toModel() }
+        }
+
+    override suspend fun getFeaturedContent(
         currentId: Int
     ): Either<RepositoryState, CuratedContentItem?> =
         either {

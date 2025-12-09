@@ -9,6 +9,7 @@ import com.codepunk.moviepunk.data.local.dao.GenreMediaTypeDao
 import com.codepunk.moviepunk.data.local.entity.CuratedContentItemEntity
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.local.entity.GenreMediaTypeEntity
+import com.codepunk.moviepunk.data.local.typeconverter.CuratedContentTypeTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.InstantTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.LocalDateTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.MediaTypeTypeConverter
@@ -23,6 +24,7 @@ import com.codepunk.moviepunk.data.local.typeconverter.MediaTypeTypeConverter
 )
 @TypeConverters(
     value = [
+        CuratedContentTypeTypeConverter::class,
         InstantTypeConverter::class,
         LocalDateTypeConverter::class,
         MediaTypeTypeConverter::class

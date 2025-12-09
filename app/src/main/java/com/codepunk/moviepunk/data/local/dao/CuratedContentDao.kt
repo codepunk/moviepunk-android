@@ -40,7 +40,8 @@ interface CuratedContentDao {
     @Query("""
           SELECT * 
             FROM curated_content 
-           WHERE id != :currentId
+           WHERE type = "featured"
+             AND id != :currentId
         ORDER BY RANDOM() LIMIT 1
     """)
     suspend fun getRandom(currentId: Int): CuratedContentItemEntity?

@@ -16,6 +16,13 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/*
+ * TODO It seems that MainScreen / MoviesScreen is instantiated when the splash screen is
+ *  still active. So we need a way to fetch these things when the sync is done.
+ *  I think the way to do that is to add a "sync complete" flow to the SyncManager and observe
+ *  that here and call refresh() when it's done.
+ */
+
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val networkConnectionManager: NetworkConnectionManager,
@@ -60,55 +67,22 @@ class MoviesViewModel @Inject constructor(
 
     private fun refresh() {
         getCuratedContent()
-//        getGenres()
         getTrendingMovies()
     }
 
     private fun getCuratedContent() {
         viewModelScope.launch(ioDispatcher) {
             state = state.copy(curatedContentLoading = true)
-            val currentId = state.curatedContentItem?.id ?: 0
-            val result = repository.getCuratedContent(currentId)
+            val currentId = state.featuredContentItem?.id ?: 0
+            val result = repository.getFeaturedContent(currentId)
             state = state.copy(curatedContentLoading = false)
             result.onRight { curatedContentItem ->
                 state = state.copy(
-                    curatedContentItem = curatedContentItem
-                )
-            }
-        }
-        /*
-        state = state.copy(
-            curatedContentLoading = true
-        )
-        viewModelScope.launch(context = ioDispatcher) {
-            repository.getRandomCuratedContentItem().collect { result ->
-                state = state.copy(
-                    curatedContentLoading = false,
-                    curatedContentItem = result.getOrElse { state.curatedContentItem },
-                    curatedContentError = result.leftOrNull()
-                )
-            }
-        }
-         */
-    }
-
-    /*
-    fun getGenres() {
-        viewModelScope.launch(context = ioDispatcher) {
-            state = state.copy(
-                genresLoading = true
-            )
-            repository.getGenres().collect { result ->
-                Timber.d(message = "Genres result: $result")
-                state = state.copy(
-                    genresLoading = false,
-                    genres = result.getOrElse { state.genres },
-                    genresError = result.leftOrNull()
+                    featuredContentItem = curatedContentItem
                 )
             }
         }
     }
-     */
 
     private fun getTrendingMovies() {
         /*

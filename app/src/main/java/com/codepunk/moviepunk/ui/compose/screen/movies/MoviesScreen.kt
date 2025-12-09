@@ -48,7 +48,7 @@ fun MoviesScreen(
          */
     }
 
-    Timber.d("curatedContentItem = ${state.curatedContentItem}")
+    Timber.d("curatedContentItem = ${state.featuredContentItem}")
 
     val pullToRefreshState: PullToRefreshState = rememberPullToRefreshState()
 
@@ -79,7 +79,7 @@ fun MoviesScreen(
                     SubcomposeAsyncImage(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        model = state.curatedContentItem?.url,
+                        model = state.featuredContentItem?.url,
                         contentDescription = "Curated Content Image",
                         success = { successState ->
                             Image(

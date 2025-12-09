@@ -3,14 +3,19 @@ package com.codepunk.moviepunk.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.codepunk.moviepunk.domain.model.CuratedContentType
 import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Entity(tableName = "curated_content")
 data class CuratedContentItemEntity(
 
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+
+    val label: String = "",
+
+    val type: CuratedContentType = CuratedContentType.UNKNOWN,
 
     val href: String = "",
 

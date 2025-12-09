@@ -9,7 +9,8 @@ import com.codepunk.moviepunk.domain.model.CuratedContentItem
 // ====================
 
 fun CuratedContentItemDto.toEntity() = CuratedContentItemEntity(
-    id = id,
+    label = label,
+    type = type,
     href = href,
     url = url
 )
@@ -20,6 +21,8 @@ fun CuratedContentItemDto.toEntity() = CuratedContentItemEntity(
 
 fun CuratedContentItemEntity.toModel() = CuratedContentItem(
     id = id,
+    label = label,
+    type = type,
     href = href,
     url = url
 )

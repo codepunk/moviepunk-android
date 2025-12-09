@@ -17,9 +17,13 @@ interface MoviePunkRepository {
 
     fun getGenres(): Flow<List<Genre>>
 
-    suspend fun syncCuratedContent(): Either<RepositoryState, Boolean>
+    suspend fun syncFeaturedContent(): Either<RepositoryState, Boolean>
 
-    suspend fun getCuratedContent(currentId: Int): Either<RepositoryState, CuratedContentItem?>
+    suspend fun syncCommunityContent(): Either<RepositoryState, Boolean>
+
+    suspend fun getCuratedContent(): Flow<List<CuratedContentItem>>
+
+    suspend fun getFeaturedContent(currentId: Int): Either<RepositoryState, CuratedContentItem?>
 
     /*
     fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>

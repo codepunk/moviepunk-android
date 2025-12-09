@@ -8,7 +8,7 @@ data class MoviesState(
     val isConnected: Boolean = false,
     val isLoadingAny: Boolean = false,
     val curatedContentLoading: Boolean = false,
-    val curatedContentItem: CuratedContentItem? = null,
+    val featuredContentItem: CuratedContentItem? = null,
     val curatedContentError: RepositoryState? = null,
     val genresLoading: Boolean = false,
     val genres: List<Genre> = emptyList(),

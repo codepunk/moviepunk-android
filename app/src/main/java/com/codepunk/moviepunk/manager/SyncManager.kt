@@ -59,7 +59,7 @@ class SyncManager @Inject constructor(
 
     private fun syncCuratedContent() {
         applicationScope.launch(ioDispatcher) {
-            _syncCuratedContentFlow.value = repository.syncCuratedContent()
+            _syncCuratedContentFlow.value = repository.syncFeaturedContent()
         }
     }
 }
