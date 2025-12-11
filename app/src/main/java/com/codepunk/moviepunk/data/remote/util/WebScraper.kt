@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.data.remote.util
 
+import android.net.Uri
 import androidx.core.net.toUri
 import com.codepunk.moviepunk.data.remote.dto.CuratedContentItemDto
 import com.codepunk.moviepunk.data.remote.response.CuratedContentResponse
@@ -10,15 +11,15 @@ import com.helger.css.decl.CSSStyleRule
 import com.helger.css.decl.visit.CSSVisitor
 import com.helger.css.decl.visit.DefaultCSSVisitor
 import com.helger.css.reader.CSSReader
+import com.helger.css.writer.CSSWriterSettings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.ResponseBody.Companion.toResponseBody
-import okhttp3.Response as OkhttpResponse
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 import retrofit2.Response
+import org.jsoup.Jsoup
 import javax.inject.Inject
 
 class WebScraper @Inject constructor(
@@ -29,127 +30,133 @@ class WebScraper @Inject constructor(
     // region Methods
 
     /**
-     * Returns a [Response] containing the result of [urlString] formatted as a text string.
+     * Returns an [okhttp3.Response] containing the result of [urlString] formatted
+     * as a text string.
      */
     private suspend fun fetchUrlText(
         urlString: String
-    ): OkhttpResponse = withContext(ioDispatcher) {
+    ): okhttp3.Response = withContext(ioDispatcher) {
         val request = Request.Builder().url(urlString).build()
         okHttpClient.newCall(request).execute()
     }
 
-    /**
-     * Returns whether the given element represents an index CSS file link, based on whether
-     * the link represents a mobile CSS file or not.
-     */
-    private fun Element.isIndexCssLink(isMobile: Boolean = true): Boolean {
-        val uri = attribute(HREF)?.value?.toUri() ?: return false
-        if (isMobile && !uri.pathSegments.contains("mobile")) return false
-        return INDEX_FILENAME_REGEX.matches(uri.lastPathSegment.orEmpty())
-    }
-
-    /**
-     * Returns the URL string of the CSS document with a name in the form of
-     * "index-(hash).css", if such a document exists
-     **/
-    private fun getIndexCssHref(
-        htmlString: String,
-        isMobile: Boolean
-    ): String? = Jsoup.parse(htmlString)
-        .select(STYLE_SHEET)
-        .find { it.isIndexCssLink(isMobile) }
-        ?.attribute(HREF)
-        ?.value
-
-    /**
-     * Scrapes the given [urlString] for the index CSS file href.
-     */
-    suspend fun scrapeUrlForIndexCssHref(
-        urlString: String,
-        isMobile: Boolean
-    ): String? {
+    suspend fun getCssUris(
+        urlString: String
+    ): Response<List<Uri>> {
+        // 1. Fetch the raw HTML text using urlString
         val response = fetchUrlText(urlString)
-        if (!response.isSuccessful) return null
-        val body = response.body ?: return null
-        return getIndexCssHref(
-            htmlString = body.string(),
-            isMobile = isMobile
-        )
-    }
-
-    suspend fun scrapeUrlForContent(
-        baseUrl: String,
-        cssHref: String,
-        curatedContentType: CuratedContentType
-    ): Response<CuratedContentResponse> {
-        // 1. Fetch the raw CSS text using CSS href
-        val okhttpResponse = fetchUrlText(baseUrl + cssHref)
 
         // 2. Handle the unsuccessful case by creating a Retrofit error response
-        if (!okhttpResponse.isSuccessful) {
-            // You can create a ResponseBody for the error from the OkHttp response body
-            val errorBody = okhttpResponse.body?.let {
-                it.string().toResponseBody(it.contentType())
-            } ?: "".toResponseBody(null) // Or provide an empty body
-
-            // Return a Retrofit error response, passing the code, message, and body
-            return Response.error(okhttpResponse.code, errorBody)
+        if (!response.isSuccessful) {
+            val responseBody = response.body
+            checkNotNull(responseBody) { "Response body is null" }
+            return Response.error(response.code, responseBody)
         }
 
-        // 3. Get the CSS body string
-        val bodyString = okhttpResponse.body?.string() ?: run {
-            // If the body is null even on a successful response, treat it as an error.
-            // A 204 No Content response is a common case for this.
-            val errorBody = "".toResponseBody(null)
-            return Response.error(okhttpResponse.code, errorBody)
+        // 3. Get the response body as an HTML string
+        val html = response.body?.string()
+        checkNotNull(html) { "Html response body is null" }
+
+        // 4. Parse HTML string to get list of index CSS file HREFs
+        val document = Jsoup.parse(html)
+        val elements = document.select(STYLE_SHEET)
+        val cssUris = elements.filter { element ->
+            val uri = element.attribute(HREF)?.value?.toUri() ?: return@filter false
+            INDEX_FILENAME_REGEX.matches(uri.lastPathSegment.orEmpty())
+        }.mapNotNull { element ->
+            element.attribute(HREF)?.value?.toUri()
         }
 
-        // 4. Read the successful response body into a CascadingStyleSheet
-        val css = CSSReader.readFromString(bodyString) ?: run {
+        return Response.success(cssUris)
+    }
+
+    suspend fun scrapeUrlForCuratedContent(
+        baseUrl: String,
+        cssHref: String,
+        regEx: Regex,
+        type: CuratedContentType
+    ): Response<CuratedContentResponse> {
+        // 1. Fetch the raw CSS text using CSS href
+        val response = fetchUrlText(baseUrl + cssHref)
+
+        // 2. Handle the unsuccessful case by creating a Retrofit error response
+        if (!response.isSuccessful) {
+            val responseBody = response.body
+            checkNotNull(responseBody) { "Response body is null" }
+            return Response.error(response.code, responseBody)
+        }
+
+        // 3. Get the response body as a CSS string
+        val cssString = response.body?.string()
+        checkNotNull(cssString) { "CSS response body is null" }
+
+        // 4. Parse CSS string to get curated content items
+        val css = CSSReader.readFromString(cssString) ?: run {
             // If we couldn't read bodyString as CSS, treat it as an error
-            val errorBody = "".toResponseBody(null)
+            val errorBody = "".toResponseBody(CSS_MEDIA_TYPE)
             return Response.error(404, errorBody)
         }
 
-        // 5. Populate curatedContent with items found in the CSS
         val curatedContent = mutableListOf<CuratedContentItemDto>()
         CSSVisitor.visitCSS(
             css,
             object : DefaultCSSVisitor() {
                 override fun onBeginStyleRule(aStyleRule: CSSStyleRule) {
-                    val cssUri = aStyleRule.allDeclarations.mapNotNull { declaration ->
-                        declaration.expression.allMembers
-                            .filter { it is CSSExpressionMemberTermURI }
-                            .map { it as CSSExpressionMemberTermURI }
-                    }.flatten().firstOrNull()?.uri ?: return
+                    val bgImageDeclaration = aStyleRule.allDeclarations.find { declaration ->
+                        declaration.property == BACKGROUND_IMAGE &&
+                                declaration.expression.allMembers.any { member ->
+                                    member is CSSExpressionMemberTermURI
+                                }
+                    } ?: return
 
-                    val regEx = curatedContentType.regEx()
-                    val label = aStyleRule.allSelectors.find { selector ->
-                        regEx.find(selector.asCSSString) != null
-                    }?.run { asCSSString } ?: return
+                    val cssMember = bgImageDeclaration.expression.allMembers
+                        .filterIsInstance<CSSExpressionMemberTermURI>()
+                        .firstOrNull() ?: return
+
+                    val label = aStyleRule.getSelectorsAsCSSString(
+                        CSSWriterSettings.DEFAULT_SETTINGS,
+                        0
+                    )
+                    if (!regEx.matches(label)) {
+                        return
+                    }
 
                     curatedContent.add(
                         CuratedContentItemDto(
                             label = label,
-                            type = curatedContentType,
+                            type = type,
                             href = cssHref,
-                            url = cssUri.uri
+                            url = cssMember.uri.uri
                         )
                     )
                 }
             }
         )
 
-        // 6. Return a Retrofit success response with the parsed data
         return Response.success(
             CuratedContentResponse(content = curatedContent.toList())
         )
     }
 
-    private fun CuratedContentType.regEx(): Regex = when (this) {
-        CuratedContentType.COMMUNITY -> COMMUNITY_BACKGROUND_REGEX
-        else -> FEATURED_BACKGROUND_REGEX
-    }
+    suspend fun scrapeUrlForFeaturedContent(
+        baseUrl: String,
+        cssHref: String
+    ): Response<CuratedContentResponse> = scrapeUrlForCuratedContent(
+        baseUrl = baseUrl,
+        cssHref = cssHref,
+        regEx = FEATURED_BACKGROUND_REGEX,
+        type = CuratedContentType.FEATURED
+    )
+
+    suspend fun scrapeUrlForCommunityContent(
+        baseUrl: String,
+        cssHref: String
+    ): Response<CuratedContentResponse> = scrapeUrlForCuratedContent(
+        baseUrl = baseUrl,
+        cssHref = cssHref,
+        regEx = COMMUNITY_BACKGROUND_REGEX,
+        type = CuratedContentType.COMMUNITY
+    )
 
     // endregion Methods
 
@@ -161,10 +168,13 @@ class WebScraper @Inject constructor(
 
         private const val HREF = "href"
         private const val STYLE_SHEET = "link[rel=stylesheet]"
+        private const val BACKGROUND_IMAGE = "background-image"
 
         // endregion Constants
 
         // region Variables
+
+        private val CSS_MEDIA_TYPE = "text/css".toMediaType()
 
         private val INDEX_FILENAME_REGEX = "(index-)([a-zA-Z0-9_.-]+)(\\.css)".toRegex()
         private val FEATURED_BACKGROUND_REGEX = "section\\.new_index\\.?(background_)([0-9]+)".toRegex()

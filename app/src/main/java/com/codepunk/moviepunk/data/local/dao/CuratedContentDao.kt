@@ -38,8 +38,12 @@ interface CuratedContentDao {
     @Query("SELECT * FROM curated_content ORDER BY id")
     fun getAll(): Flow<List<CuratedContentItemEntity>>
 
-    @Query("SELECT href FROM curated_content LIMIT 1")
-    suspend fun getFirst(): String?
+    @Query("""
+          SELECT href 
+            FROM curated_content 
+           WHERE type = :type
+           LIMIT 1""")
+    suspend fun getHref(type: String): String?
 
     @Query("SELECT min(created_at) FROM curated_content")
     suspend fun getOldest(): Instant

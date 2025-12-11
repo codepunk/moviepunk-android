@@ -26,7 +26,6 @@ import com.codepunk.moviepunk.domain.repository.RepositoryState.ExceptionState
 import com.codepunk.moviepunk.util.extension.isConnected
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.io.IOException
 import kotlin.collections.map
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -106,59 +105,64 @@ class MoviePunkRepositoryImpl(
         entities.map { it.toModel() }
     }
 
-    override suspend fun syncCuratedContent(
-        curatedContentType: CuratedContentType
-    ): Either<RepositoryState, Boolean> {
-        lateinit var cssHref: String
-        var dataUpdated = false
-        return either {
-            networkBoundResource(
-                query = { curatedContentDao.getAll() },
-                fetch = {
-                    webScraper.scrapeUrlForContent(
-                        baseUrl = BuildConfig.TMDB_URL,
-                        cssHref = cssHref,
-                        curatedContentType = curatedContentType
-                    ).toApiEither().bind().content
-                },
-                shouldFetch = { content ->
-                    either {
-                        // Get the CSS href for curated content
-                        cssHref = try {
-                            val isMobile = (curatedContentType == CuratedContentType.FEATURED)
-                            webScraper.scrapeUrlForIndexCssHref(
-                                urlString = BuildConfig.TMDB_URL,
-                                isMobile = isMobile
-                            )
-                        } catch (e: Exception) {
-                            raise(ExceptionState(e))
-                        } ?: raise(
-                            ExceptionState(IOException(CSS_MESSAGE))
-                        )
+    override suspend fun syncCuratedContent(): Either<RepositoryState, Boolean> = either {
+        // 1. Get the remote CSS Hrefs
+        val cssUris = webScraper.getCssUris(
+            urlString = BuildConfig.TMDB_URL
+        ).toApiEither().bind()
 
-                        // Check whether the network uses a new href
-                        val cachedCssHref = content.firstOrNull()?.href
-                        cachedCssHref != cssHref
-                    }.fold(
-                        ifLeft = { raise(it) },
-                        ifRight = { true }
-                    )
-                },
-                saveFetchResult = { dtos ->
-                    dataUpdated = try {
-                        db.withTransaction {
-                            curatedContentDao.deleteAll(curatedContentType.value)
-                            curatedContentDao.insertAll(
-                                dtos.map { it.toEntity() }
-                            )
-                            true
-                        }
-                    } catch (e: SQLiteConstraintException) {
-                        raise(ExceptionState(e))
-                    }
-                },
-                transform = { dataUpdated }
-            )
+        // 2. Find mobile and non-mobile hrefs (there should only be one of each)
+        val standardCssUri = cssUris.find { !it.pathSegments.contains(MOBILE) }
+        val mobileCssUri = cssUris.find { it.pathSegments.contains(MOBILE) }
+
+        // 3. Fetch featured content
+        val networkFeaturedCssHref = mobileCssUri?.toString().orEmpty()
+        val cachedFeaturedCssHref = curatedContentDao.getHref(
+            type = CuratedContentType.FEATURED.value
+        )
+        val featured = if (networkFeaturedCssHref != cachedFeaturedCssHref) {
+            val response = webScraper.scrapeUrlForFeaturedContent(
+                baseUrl = BuildConfig.TMDB_URL,
+                cssHref = networkFeaturedCssHref
+            ).toApiEither().bind()
+            response.content
+        } else {
+            emptyList()
+        }
+
+        // 4. Fetch community content
+        val networkCommunityCssHref = standardCssUri?.toString().orEmpty()
+        val cachedCommunityCssHref = curatedContentDao.getHref(
+            type = CuratedContentType.COMMUNITY.value
+        )
+        val community = if (networkCommunityCssHref != cachedCommunityCssHref) {
+            val response = webScraper.scrapeUrlForCommunityContent(
+                baseUrl = BuildConfig.TMDB_URL,
+                cssHref = networkCommunityCssHref
+            ).toApiEither().bind()
+            response.content
+        } else {
+            emptyList()
+        }
+
+        // Save any newly-fetched content
+        try {
+            var dataUpdated = false
+            db.withTransaction {
+                if (featured.isNotEmpty()) {
+                    curatedContentDao.deleteAll(CuratedContentType.FEATURED.value)
+                    curatedContentDao.insertAll(featured.map { it.toEntity() })
+                    dataUpdated = true
+                }
+                if (community.isNotEmpty()) {
+                    curatedContentDao.deleteAll(CuratedContentType.COMMUNITY.value)
+                    curatedContentDao.insertAll(community.map { it.toEntity() })
+                    dataUpdated = true
+                }
+            }
+            dataUpdated
+        } catch (e: SQLiteConstraintException) {
+            raise(ExceptionState(e))
         }
     }
 
@@ -193,7 +197,7 @@ class MoviePunkRepositoryImpl(
     // region Companion object
 
     private companion object {
-        private const val CSS_MESSAGE = "Failed to retrieve CSS href"
+        private const val MOBILE = "mobile"
     }
 
     // endregion Companion object

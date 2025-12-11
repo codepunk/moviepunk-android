@@ -23,13 +23,11 @@ class SplashViewModel @Inject constructor(
 
     val syncCompleteFlow = combine(
         syncManager.syncGenresFlow,
-        syncManager.syncFeaturedContentFlow,
-        syncManager.syncCommunityContentFlow,
+        syncManager.syncCuratedContentFlow,
         minimumTimeFlow,
         maximumTimeFlow
     ) {genreResult,
        curatedContentResult,
-       communityContentResult,
        minimumTimeReached,
        maximumTimeReached ->
         when {
@@ -37,7 +35,6 @@ class SplashViewModel @Inject constructor(
             maximumTimeReached -> true
             genreResult.leftOrNull() == UninitializedState -> false
             curatedContentResult.leftOrNull() == UninitializedState -> false
-            communityContentResult.leftOrNull() == UninitializedState -> false
             else -> true
         }
     }
