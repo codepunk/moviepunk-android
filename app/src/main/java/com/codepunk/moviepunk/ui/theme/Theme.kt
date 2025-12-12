@@ -2,6 +2,8 @@
 
 package com.codepunk.moviepunk.ui.theme
 
+import android.app.UiModeManager
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,9 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+private const val MEDIUM_CONTRAST = (1f / 3)
+private const val HIGH_CONTRAST = (2f / 3)
 
 @Immutable
 data class ExtendedColorScheme(
@@ -619,6 +624,46 @@ val MaterialTheme.dimens: FixedDimensScheme
     @ReadOnlyComposable
     get() = LocalDimens.current
 
+@Suppress("SameParameterValue")
+@Composable
+private fun <S> chooseColorScheme(
+    darkTheme: Boolean,
+    dynamicColor: Boolean,
+    lightScheme: S,
+    darkScheme: S,
+    mediumContrastLightColorScheme: S,
+    mediumContrastDarkColorScheme: S,
+    highContrastLightColorScheme: S,
+    highContrastDarkColorScheme: S,
+    dynamicChooser: (Context) -> S? = { _ -> null }
+): S {
+    val context = LocalContext.current
+    val uiModeManager = context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+    return if (!dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        if (darkTheme) {
+            when {
+                uiModeManager.contrast >= HIGH_CONTRAST -> highContrastDarkColorScheme
+                uiModeManager.contrast >= MEDIUM_CONTRAST -> mediumContrastDarkColorScheme
+                else -> darkScheme
+            }
+        } else {
+            when {
+                uiModeManager.contrast >= HIGH_CONTRAST -> highContrastLightColorScheme
+                uiModeManager.contrast >= MEDIUM_CONTRAST -> mediumContrastLightColorScheme
+                else -> lightScheme
+            }
+        }
+    } else if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        dynamicChooser(context)
+    } else {
+        null
+    } ?: if (darkTheme) {
+        darkScheme
+    } else {
+        lightScheme
+    }
+}
+
 @Composable
 fun MoviePunkTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -626,14 +671,21 @@ fun MoviePunkTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val colorScheme = chooseColorScheme(
+        darkTheme = darkTheme,
+        dynamicColor = dynamicColor,
+        lightScheme = lightScheme,
+        darkScheme = darkScheme,
+        mediumContrastLightColorScheme = mediumContrastLightColorScheme,
+        mediumContrastDarkColorScheme = mediumContrastDarkColorScheme,
+        highContrastLightColorScheme = highContrastLightColorScheme,
+        highContrastDarkColorScheme = highContrastDarkColorScheme
+    ) { context ->
+        if (darkTheme) {
+            dynamicDarkColorScheme(context)
+        } else {
+            dynamicLightColorScheme(context)
         }
-
-        darkTheme -> darkScheme
-        else -> lightScheme
     }
 
     CompositionLocalProvider(LocalDimens provides fixedDimens) {
