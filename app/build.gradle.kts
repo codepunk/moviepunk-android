@@ -182,6 +182,9 @@ dependencies {
     // Desugaring (for using java.time APIs on older Android versions)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    // Google Fonts
+    implementation(libs.google.fonts)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
