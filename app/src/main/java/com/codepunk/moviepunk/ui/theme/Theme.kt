@@ -24,14 +24,15 @@ private const val HIGH_CONTRAST = (2f / 3)
 
 @Immutable
 data class ExtendedColorScheme(
-    val darkGray: ColorFamily,
-    val blue: ColorFamily,
-    val blueGray: ColorFamily,
-    val orange: ColorFamily,
-    val yellow: ColorFamily,
-    val lightGreen: ColorFamily,
-    val lilac: ColorFamily,
-    val magenta: ColorFamily
+    val tmdbGradientStart: ColorFamily,
+    val tmdbGradientEnd: ColorFamily,
+    val coolGradientStart: ColorFamily,
+    val coolGradientEnd: ColorFamily,
+    val warmGradientStart: ColorFamily,
+    val warmGradientEnd: ColorFamily,
+    val hotGradientStart: ColorFamily,
+    val hotGradientEnd: ColorFamily,
+    val cta: ColorFamily,
 )
 
 private val lightScheme = lightColorScheme(
@@ -263,309 +264,345 @@ private val highContrastDarkColorScheme = darkColorScheme(
 )
 
 val extendedLight = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayLight,
-        onDarkGrayLight,
-        darkGrayContainerLight,
-        onDarkGrayContainerLight,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartLight,
+        onTmdbGradientStartLight,
+        tmdbGradientStartContainerLight,
+        onTmdbGradientStartContainerLight,
     ),
-    blue = ColorFamily(
-        blueLight,
-        onBlueLight,
-        blueContainerLight,
-        onBlueContainerLight,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndLight,
+        onTmdbGradientEndLight,
+        tmdbGradientEndContainerLight,
+        onTmdbGradientEndContainerLight,
     ),
-    blueGray = ColorFamily(
-        blueGrayLight,
-        onBlueGrayLight,
-        blueGrayContainerLight,
-        onBlueGrayContainerLight,
+    coolGradientStart = ColorFamily(
+        coolGradientStartLight,
+        onCoolGradientStartLight,
+        coolGradientStartContainerLight,
+        onCoolGradientStartContainerLight,
     ),
-    orange = ColorFamily(
-        orangeLight,
-        onOrangeLight,
-        orangeContainerLight,
-        onOrangeContainerLight,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndLight,
+        onCoolGradientEndLight,
+        coolGradientEndContainerLight,
+        onCoolGradientEndContainerLight,
     ),
-    yellow = ColorFamily(
-        yellowLight,
-        onYellowLight,
-        yellowContainerLight,
-        onYellowContainerLight,
+    warmGradientStart = ColorFamily(
+        warmGradientStartLight,
+        onWarmGradientStartLight,
+        warmGradientStartContainerLight,
+        onWarmGradientStartContainerLight,
     ),
-    lightGreen = ColorFamily(
-        lightGreenLight,
-        onLightGreenLight,
-        lightGreenContainerLight,
-        onLightGreenContainerLight,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndLight,
+        onWarmGradientEndLight,
+        warmGradientEndContainerLight,
+        onWarmGradientEndContainerLight,
     ),
-    lilac = ColorFamily(
-        lilacLight,
-        onLilacLight,
-        lilacContainerLight,
-        onLilacContainerLight,
+    hotGradientStart = ColorFamily(
+        hotGradientStartLight,
+        onHotGradientStartLight,
+        hotGradientStartContainerLight,
+        onHotGradientStartContainerLight,
     ),
-    magenta = ColorFamily(
-        magentaLight,
-        onMagentaLight,
-        magentaContainerLight,
-        onMagentaContainerLight,
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndLight,
+        onHotGradientEndLight,
+        hotGradientEndContainerLight,
+        onHotGradientEndContainerLight,
+    ),
+    cta = ColorFamily(
+        ctaLight,
+        onCtaLight,
+        ctaContainerLight,
+        onCtaContainerLight,
+    ),
 )
 
 val extendedDark = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayDark,
-        onDarkGrayDark,
-        darkGrayContainerDark,
-        onDarkGrayContainerDark,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartDark,
+        onTmdbGradientStartDark,
+        tmdbGradientStartContainerDark,
+        onTmdbGradientStartContainerDark,
     ),
-    blue = ColorFamily(
-        blueDark,
-        onBlueDark,
-        blueContainerDark,
-        onBlueContainerDark,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndDark,
+        onTmdbGradientEndDark,
+        tmdbGradientEndContainerDark,
+        onTmdbGradientEndContainerDark,
     ),
-    blueGray = ColorFamily(
-        blueGrayDark,
-        onBlueGrayDark,
-        blueGrayContainerDark,
-        onBlueGrayContainerDark,
+    coolGradientStart = ColorFamily(
+        coolGradientStartDark,
+        onCoolGradientStartDark,
+        coolGradientStartContainerDark,
+        onCoolGradientStartContainerDark,
     ),
-    orange = ColorFamily(
-        orangeDark,
-        onOrangeDark,
-        orangeContainerDark,
-        onOrangeContainerDark,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndDark,
+        onCoolGradientEndDark,
+        coolGradientEndContainerDark,
+        onCoolGradientEndContainerDark,
     ),
-    yellow = ColorFamily(
-        yellowDark,
-        onYellowDark,
-        yellowContainerDark,
-        onYellowContainerDark,
+    warmGradientStart = ColorFamily(
+        warmGradientStartDark,
+        onWarmGradientStartDark,
+        warmGradientStartContainerDark,
+        onWarmGradientStartContainerDark,
     ),
-    lightGreen = ColorFamily(
-        lightGreenDark,
-        onLightGreenDark,
-        lightGreenContainerDark,
-        onLightGreenContainerDark,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndDark,
+        onWarmGradientEndDark,
+        warmGradientEndContainerDark,
+        onWarmGradientEndContainerDark,
     ),
-    lilac = ColorFamily(
-        lilacDark,
-        onLilacDark,
-        lilacContainerDark,
-        onLilacContainerDark,
+    hotGradientStart = ColorFamily(
+        hotGradientStartDark,
+        onHotGradientStartDark,
+        hotGradientStartContainerDark,
+        onHotGradientStartContainerDark,
     ),
-    magenta = ColorFamily(
-        magentaDark,
-        onMagentaDark,
-        magentaContainerDark,
-        onMagentaContainerDark,
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndDark,
+        onHotGradientEndDark,
+        hotGradientEndContainerDark,
+        onHotGradientEndContainerDark,
+    ),
+    cta = ColorFamily(
+        ctaDark,
+        onCtaDark,
+        ctaContainerDark,
+        onCtaContainerDark,
+    ),
 )
 
 val extendedLightMediumContrast = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayLightMediumContrast,
-        onDarkGrayLightMediumContrast,
-        darkGrayContainerLightMediumContrast,
-        onDarkGrayContainerLightMediumContrast,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartLightMediumContrast,
+        onTmdbGradientStartLightMediumContrast,
+        tmdbGradientStartContainerLightMediumContrast,
+        onTmdbGradientStartContainerLightMediumContrast,
     ),
-    blue = ColorFamily(
-        blueLightMediumContrast,
-        onBlueLightMediumContrast,
-        blueContainerLightMediumContrast,
-        onBlueContainerLightMediumContrast,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndLightMediumContrast,
+        onTmdbGradientEndLightMediumContrast,
+        tmdbGradientEndContainerLightMediumContrast,
+        onTmdbGradientEndContainerLightMediumContrast,
     ),
-    blueGray = ColorFamily(
-        blueGrayLightMediumContrast,
-        onBlueGrayLightMediumContrast,
-        blueGrayContainerLightMediumContrast,
-        onBlueGrayContainerLightMediumContrast,
+    coolGradientStart = ColorFamily(
+        coolGradientStartLightMediumContrast,
+        onCoolGradientStartLightMediumContrast,
+        coolGradientStartContainerLightMediumContrast,
+        onCoolGradientStartContainerLightMediumContrast,
     ),
-    orange = ColorFamily(
-        orangeLightMediumContrast,
-        onOrangeLightMediumContrast,
-        orangeContainerLightMediumContrast,
-        onOrangeContainerLightMediumContrast,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndLightMediumContrast,
+        onCoolGradientEndLightMediumContrast,
+        coolGradientEndContainerLightMediumContrast,
+        onCoolGradientEndContainerLightMediumContrast,
     ),
-    yellow = ColorFamily(
-        yellowLightMediumContrast,
-        onYellowLightMediumContrast,
-        yellowContainerLightMediumContrast,
-        onYellowContainerLightMediumContrast,
+    warmGradientStart = ColorFamily(
+        warmGradientStartLightMediumContrast,
+        onWarmGradientStartLightMediumContrast,
+        warmGradientStartContainerLightMediumContrast,
+        onWarmGradientStartContainerLightMediumContrast,
     ),
-    lightGreen = ColorFamily(
-        lightGreenLightMediumContrast,
-        onLightGreenLightMediumContrast,
-        lightGreenContainerLightMediumContrast,
-        onLightGreenContainerLightMediumContrast,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndLightMediumContrast,
+        onWarmGradientEndLightMediumContrast,
+        warmGradientEndContainerLightMediumContrast,
+        onWarmGradientEndContainerLightMediumContrast,
     ),
-    lilac = ColorFamily(
-        lilacLightMediumContrast,
-        onLilacLightMediumContrast,
-        lilacContainerLightMediumContrast,
-        onLilacContainerLightMediumContrast,
+    hotGradientStart = ColorFamily(
+        hotGradientStartLightMediumContrast,
+        onHotGradientStartLightMediumContrast,
+        hotGradientStartContainerLightMediumContrast,
+        onHotGradientStartContainerLightMediumContrast,
     ),
-    magenta = ColorFamily(
-        magentaLightMediumContrast,
-        onMagentaLightMediumContrast,
-        magentaContainerLightMediumContrast,
-        onMagentaContainerLightMediumContrast
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndLightMediumContrast,
+        onHotGradientEndLightMediumContrast,
+        hotGradientEndContainerLightMediumContrast,
+        onHotGradientEndContainerLightMediumContrast,
+    ),
+    cta = ColorFamily(
+        ctaLightMediumContrast,
+        onCtaLightMediumContrast,
+        ctaContainerLightMediumContrast,
+        onCtaContainerLightMediumContrast,
+    ),
 )
 
 val extendedLightHighContrast = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayLightHighContrast,
-        onDarkGrayLightHighContrast,
-        darkGrayContainerLightHighContrast,
-        onDarkGrayContainerLightHighContrast,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartLightHighContrast,
+        onTmdbGradientStartLightHighContrast,
+        tmdbGradientStartContainerLightHighContrast,
+        onTmdbGradientStartContainerLightHighContrast,
     ),
-    blue = ColorFamily(
-        blueLightHighContrast,
-        onBlueLightHighContrast,
-        blueContainerLightHighContrast,
-        onBlueContainerLightHighContrast,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndLightHighContrast,
+        onTmdbGradientEndLightHighContrast,
+        tmdbGradientEndContainerLightHighContrast,
+        onTmdbGradientEndContainerLightHighContrast,
     ),
-    blueGray = ColorFamily(
-        blueGrayLightHighContrast,
-        onBlueGrayLightHighContrast,
-        blueGrayContainerLightHighContrast,
-        onBlueGrayContainerLightHighContrast,
+    coolGradientStart = ColorFamily(
+        coolGradientStartLightHighContrast,
+        onCoolGradientStartLightHighContrast,
+        coolGradientStartContainerLightHighContrast,
+        onCoolGradientStartContainerLightHighContrast,
     ),
-    orange = ColorFamily(
-        orangeLightHighContrast,
-        onOrangeLightHighContrast,
-        orangeContainerLightHighContrast,
-        onOrangeContainerLightHighContrast,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndLightHighContrast,
+        onCoolGradientEndLightHighContrast,
+        coolGradientEndContainerLightHighContrast,
+        onCoolGradientEndContainerLightHighContrast,
     ),
-    yellow = ColorFamily(
-        yellowLightHighContrast,
-        onYellowLightHighContrast,
-        yellowContainerLightHighContrast,
-        onYellowContainerLightHighContrast,
+    warmGradientStart = ColorFamily(
+        warmGradientStartLightHighContrast,
+        onWarmGradientStartLightHighContrast,
+        warmGradientStartContainerLightHighContrast,
+        onWarmGradientStartContainerLightHighContrast,
     ),
-    lightGreen = ColorFamily(
-        lightGreenLightHighContrast,
-        onLightGreenLightHighContrast,
-        lightGreenContainerLightHighContrast,
-        onLightGreenContainerLightHighContrast,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndLightHighContrast,
+        onWarmGradientEndLightHighContrast,
+        warmGradientEndContainerLightHighContrast,
+        onWarmGradientEndContainerLightHighContrast,
     ),
-    lilac = ColorFamily(
-        lilacLightHighContrast,
-        onLilacLightHighContrast,
-        lilacContainerLightHighContrast,
-        onLilacContainerLightHighContrast,
+    hotGradientStart = ColorFamily(
+        hotGradientStartLightHighContrast,
+        onHotGradientStartLightHighContrast,
+        hotGradientStartContainerLightHighContrast,
+        onHotGradientStartContainerLightHighContrast,
     ),
-    magenta = ColorFamily(
-        magentaLightHighContrast,
-        onMagentaLightHighContrast,
-        magentaContainerLightHighContrast,
-        onMagentaContainerLightHighContrast
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndLightHighContrast,
+        onHotGradientEndLightHighContrast,
+        hotGradientEndContainerLightHighContrast,
+        onHotGradientEndContainerLightHighContrast,
+    ),
+    cta = ColorFamily(
+        ctaLightHighContrast,
+        onCtaLightHighContrast,
+        ctaContainerLightHighContrast,
+        onCtaContainerLightHighContrast,
+    ),
 )
 
 val extendedDarkMediumContrast = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayDarkMediumContrast,
-        onDarkGrayDarkMediumContrast,
-        darkGrayContainerDarkMediumContrast,
-        onDarkGrayContainerDarkMediumContrast,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartDarkMediumContrast,
+        onTmdbGradientStartDarkMediumContrast,
+        tmdbGradientStartContainerDarkMediumContrast,
+        onTmdbGradientStartContainerDarkMediumContrast,
     ),
-    blue = ColorFamily(
-        blueDarkMediumContrast,
-        onBlueDarkMediumContrast,
-        blueContainerDarkMediumContrast,
-        onBlueContainerDarkMediumContrast,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndDarkMediumContrast,
+        onTmdbGradientEndDarkMediumContrast,
+        tmdbGradientEndContainerDarkMediumContrast,
+        onTmdbGradientEndContainerDarkMediumContrast,
     ),
-    blueGray = ColorFamily(
-        blueGrayDarkMediumContrast,
-        onBlueGrayDarkMediumContrast,
-        blueGrayContainerDarkMediumContrast,
-        onBlueGrayContainerDarkMediumContrast,
+    coolGradientStart = ColorFamily(
+        coolGradientStartDarkMediumContrast,
+        onCoolGradientStartDarkMediumContrast,
+        coolGradientStartContainerDarkMediumContrast,
+        onCoolGradientStartContainerDarkMediumContrast,
     ),
-    orange = ColorFamily(
-        orangeDarkMediumContrast,
-        onOrangeDarkMediumContrast,
-        orangeContainerDarkMediumContrast,
-        onOrangeContainerDarkMediumContrast,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndDarkMediumContrast,
+        onCoolGradientEndDarkMediumContrast,
+        coolGradientEndContainerDarkMediumContrast,
+        onCoolGradientEndContainerDarkMediumContrast,
     ),
-    yellow = ColorFamily(
-        yellowDarkMediumContrast,
-        onYellowDarkMediumContrast,
-        yellowContainerDarkMediumContrast,
-        onYellowContainerDarkMediumContrast,
+    warmGradientStart = ColorFamily(
+        warmGradientStartDarkMediumContrast,
+        onWarmGradientStartDarkMediumContrast,
+        warmGradientStartContainerDarkMediumContrast,
+        onWarmGradientStartContainerDarkMediumContrast,
     ),
-    lightGreen = ColorFamily(
-        lightGreenDarkMediumContrast,
-        onLightGreenDarkMediumContrast,
-        lightGreenContainerDarkMediumContrast,
-        onLightGreenContainerDarkMediumContrast,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndDarkMediumContrast,
+        onWarmGradientEndDarkMediumContrast,
+        warmGradientEndContainerDarkMediumContrast,
+        onWarmGradientEndContainerDarkMediumContrast,
     ),
-    lilac = ColorFamily(
-        lilacDarkMediumContrast,
-        onLilacDarkMediumContrast,
-        lilacContainerDarkMediumContrast,
-        onLilacContainerDarkMediumContrast,
+    hotGradientStart = ColorFamily(
+        hotGradientStartDarkMediumContrast,
+        onHotGradientStartDarkMediumContrast,
+        hotGradientStartContainerDarkMediumContrast,
+        onHotGradientStartContainerDarkMediumContrast,
     ),
-    magenta = ColorFamily(
-        magentaDarkMediumContrast,
-        onMagentaDarkMediumContrast,
-        magentaContainerDarkMediumContrast,
-        onMagentaContainerDarkMediumContrast
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndDarkMediumContrast,
+        onHotGradientEndDarkMediumContrast,
+        hotGradientEndContainerDarkMediumContrast,
+        onHotGradientEndContainerDarkMediumContrast,
+    ),
+    cta = ColorFamily(
+        ctaDarkMediumContrast,
+        onCtaDarkMediumContrast,
+        ctaContainerDarkMediumContrast,
+        onCtaContainerDarkMediumContrast,
+    ),
 )
 
 val extendedDarkHighContrast = ExtendedColorScheme(
-    darkGray = ColorFamily(
-        darkGrayDarkHighContrast,
-        onDarkGrayDarkHighContrast,
-        darkGrayContainerDarkHighContrast,
-        onDarkGrayContainerDarkHighContrast,
+    tmdbGradientStart = ColorFamily(
+        tmdbGradientStartDarkHighContrast,
+        onTmdbGradientStartDarkHighContrast,
+        tmdbGradientStartContainerDarkHighContrast,
+        onTmdbGradientStartContainerDarkHighContrast,
     ),
-    blue = ColorFamily(
-        blueDarkHighContrast,
-        onBlueDarkHighContrast,
-        blueContainerDarkHighContrast,
-        onBlueContainerDarkHighContrast,
+    tmdbGradientEnd = ColorFamily(
+        tmdbGradientEndDarkHighContrast,
+        onTmdbGradientEndDarkHighContrast,
+        tmdbGradientEndContainerDarkHighContrast,
+        onTmdbGradientEndContainerDarkHighContrast,
     ),
-    blueGray = ColorFamily(
-        blueGrayDarkHighContrast,
-        onBlueGrayDarkHighContrast,
-        blueGrayContainerDarkHighContrast,
-        onBlueGrayContainerDarkHighContrast,
+    coolGradientStart = ColorFamily(
+        coolGradientStartDarkHighContrast,
+        onCoolGradientStartDarkHighContrast,
+        coolGradientStartContainerDarkHighContrast,
+        onCoolGradientStartContainerDarkHighContrast,
     ),
-    orange = ColorFamily(
-        orangeDarkHighContrast,
-        onOrangeDarkHighContrast,
-        orangeContainerDarkHighContrast,
-        onOrangeContainerDarkHighContrast,
+    coolGradientEnd = ColorFamily(
+        coolGradientEndDarkHighContrast,
+        onCoolGradientEndDarkHighContrast,
+        coolGradientEndContainerDarkHighContrast,
+        onCoolGradientEndContainerDarkHighContrast,
     ),
-    yellow = ColorFamily(
-        yellowDarkHighContrast,
-        onYellowDarkHighContrast,
-        yellowContainerDarkHighContrast,
-        onYellowContainerDarkHighContrast,
+    warmGradientStart = ColorFamily(
+        warmGradientStartDarkHighContrast,
+        onWarmGradientStartDarkHighContrast,
+        warmGradientStartContainerDarkHighContrast,
+        onWarmGradientStartContainerDarkHighContrast,
     ),
-    lightGreen = ColorFamily(
-        lightGreenDarkHighContrast,
-        onLightGreenDarkHighContrast,
-        lightGreenContainerDarkHighContrast,
-        onLightGreenContainerDarkHighContrast,
+    warmGradientEnd = ColorFamily(
+        warmGradientEndDarkHighContrast,
+        onWarmGradientEndDarkHighContrast,
+        warmGradientEndContainerDarkHighContrast,
+        onWarmGradientEndContainerDarkHighContrast,
     ),
-    lilac = ColorFamily(
-        lilacDarkHighContrast,
-        onLilacDarkHighContrast,
-        lilacContainerDarkHighContrast,
-        onLilacContainerDarkHighContrast,
+    hotGradientStart = ColorFamily(
+        hotGradientStartDarkHighContrast,
+        onHotGradientStartDarkHighContrast,
+        hotGradientStartContainerDarkHighContrast,
+        onHotGradientStartContainerDarkHighContrast,
     ),
-    magenta = ColorFamily(
-        magentaDarkHighContrast,
-        onMagentaDarkHighContrast,
-        magentaContainerDarkHighContrast,
-        onMagentaContainerDarkHighContrast
-    )
+    hotGradientEnd = ColorFamily(
+        hotGradientEndDarkHighContrast,
+        onHotGradientEndDarkHighContrast,
+        hotGradientEndContainerDarkHighContrast,
+        onHotGradientEndContainerDarkHighContrast,
+    ),
+    cta = ColorFamily(
+        ctaDarkHighContrast,
+        onCtaDarkHighContrast,
+        ctaContainerDarkHighContrast,
+        onCtaContainerDarkHighContrast,
+    ),
 )
 
 @Immutable
@@ -618,11 +655,33 @@ private val fixedDimens = FixedDimensScheme(
 
 val LocalDimens = staticCompositionLocalOf { fixedDimens }
 
+val LocalExtendedColorScheme = staticCompositionLocalOf {
+    // Provide a default empty scheme to avoid crashes during composition.
+    // This will be replaced by the actual scheme in MoviePunkTheme.
+    ExtendedColorScheme(
+        tmdbGradientStart = unspecified_scheme,
+        tmdbGradientEnd = unspecified_scheme,
+        coolGradientStart = unspecified_scheme,
+        coolGradientEnd = unspecified_scheme,
+        warmGradientStart = unspecified_scheme,
+        warmGradientEnd = unspecified_scheme,
+        hotGradientStart = unspecified_scheme,
+        hotGradientEnd = unspecified_scheme,
+        cta = unspecified_scheme
+    )
+}
+
 @Suppress("UnusedReceiverParameter")
 val MaterialTheme.dimens: FixedDimensScheme
     @Composable
     @ReadOnlyComposable
     get() = LocalDimens.current
+
+@Suppress("UnusedReceiverParameter")
+val MaterialTheme.extendedColorScheme: ExtendedColorScheme
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalExtendedColorScheme.current
 
 @Suppress("SameParameterValue")
 @Composable
@@ -688,7 +747,21 @@ fun MoviePunkTheme(
         }
     }
 
-    CompositionLocalProvider(LocalDimens provides fixedDimens) {
+    val extendedColorScheme = chooseColorScheme(
+        darkTheme = darkTheme,
+        dynamicColor = dynamicColor,
+        lightScheme = extendedLight,
+        darkScheme = extendedDark,
+        mediumContrastLightColorScheme = extendedLightMediumContrast,
+        mediumContrastDarkColorScheme = extendedDarkMediumContrast,
+        highContrastLightColorScheme = extendedLightHighContrast,
+        highContrastDarkColorScheme = extendedDarkHighContrast
+    )
+
+    CompositionLocalProvider(
+        LocalDimens provides fixedDimens,
+        LocalExtendedColorScheme provides extendedColorScheme
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = AppTypography,

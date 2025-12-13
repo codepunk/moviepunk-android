@@ -9,6 +9,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -52,7 +53,10 @@ fun HomeTopAppBar(
 
                     )
                 }
-            }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                //containerColor = MaterialTheme.colorScheme.inverseSurface
+            )
         )
     } else {
         @DrawableRes val appIcon = R.drawable.tmdb_logo_vert
@@ -72,7 +76,10 @@ fun HomeTopAppBar(
 
                     )
                 }
-            }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                //containerColor = MaterialTheme.colorScheme.inverseSurface
+            )
         )
     }
 }
