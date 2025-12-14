@@ -3,12 +3,22 @@ package com.codepunk.moviepunk.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.withTransaction
+import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.local.relation.GenreWithMediaTypes
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface GenreDao {
+abstract class GenreDao(
+    private val db: MoviePunkDatabase
+) {
+
+    // region Variables
+
+    private val genreMediaTypeDao: GenreMediaTypeDao = db.genreMediaTypeDao()
+
+    // endregion Variables
 
     // region Methods
 
@@ -17,10 +27,28 @@ interface GenreDao {
     // ====================
 
     @Insert
-    suspend fun insert(genres: GenreEntity)
+    abstract suspend fun insert(genres: GenreEntity)
 
     @Insert
-    suspend fun insertAll(genres: List<GenreEntity>)
+    abstract suspend fun insertAll(genres: List<GenreEntity>)
+
+    suspend fun insertWithMediaTypes(genreWidthMediaTypes: GenreWithMediaTypes) {
+        db.withTransaction {
+            this.insert(genreWidthMediaTypes.genre)
+            genreMediaTypeDao.insertAll(genreWidthMediaTypes.mediaTypes)
+        }
+    }
+
+    suspend fun insertAllWithMediaTypes(genresWithMediaTypes: List<GenreWithMediaTypes>) {
+        db.withTransaction {
+            this.insertAll(
+                genresWithMediaTypes.map { it.genre }
+            )
+            genreMediaTypeDao.insertAll(
+                genresWithMediaTypes.map { it.mediaTypes }.flatten()
+            )
+        }
+    }
 
     // ====================
     // Delete
@@ -31,7 +59,7 @@ interface GenreDao {
      * movie_genre and tv_genre tables due to foreign key cascade.
      */
     @Query("DELETE FROM genre")
-    suspend fun deleteAll()
+    abstract suspend fun deleteAll()
 
     // ====================
     // Query
@@ -43,7 +71,7 @@ interface GenreDao {
         LEFT OUTER JOIN genre_media_type
         ON genre.id = genre_media_type.genre_id
     """)
-    fun getAll(): Flow<List<GenreWithMediaTypes>>
+    abstract fun getAll(): Flow<List<GenreWithMediaTypes>>
 
     // endregion Methods
 

@@ -4,7 +4,6 @@ import android.net.ConnectivityManager
 import androidx.paging.PagingConfig
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
-import com.codepunk.moviepunk.data.local.dao.CombinedDao
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.remote.util.WebScraper
@@ -35,7 +34,6 @@ class DataModule {
     fun provideMoviePunkRepository(
         connectivityManager: ConnectivityManager,
         db: MoviePunkDatabase,
-        combinedDao: CombinedDao,
         curatedContentDao: CuratedContentDao,
         genreDao: GenreDao,
         webservice: MoviePunkWebservice,
@@ -46,7 +44,6 @@ class DataModule {
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         connectivityManager = connectivityManager,
         db = db,
-        combinedDao = combinedDao,
         curatedContentDao = curatedContentDao,
         genreDao = genreDao,
         webservice = webservice,

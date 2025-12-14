@@ -7,7 +7,6 @@ import arrow.core.Either
 import arrow.core.raise.either
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
-import com.codepunk.moviepunk.data.local.dao.CombinedDao
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.mapper.toEntity
@@ -33,7 +32,6 @@ import kotlin.time.Duration.Companion.minutes
 class MoviePunkRepositoryImpl(
     private val connectivityManager: ConnectivityManager,
     private val db: MoviePunkDatabase,
-    private val combinedDao: CombinedDao,
     private val curatedContentDao: CuratedContentDao,
     private val genreDao: GenreDao,
     private val webservice: MoviePunkWebservice,
@@ -85,7 +83,7 @@ class MoviePunkRepositoryImpl(
                     dataUpdated = try {
                         db.withTransaction {
                             genreDao.deleteAll()
-                            combinedDao.insertAll(
+                            genreDao.insertAllWithMediaTypes(
                                 dtos.map { it.toEntity() }
                             )
                             true

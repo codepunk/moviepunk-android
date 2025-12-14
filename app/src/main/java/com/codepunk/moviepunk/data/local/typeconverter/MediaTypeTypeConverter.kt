@@ -8,10 +8,10 @@ class MediaTypeTypeConverter {
     // region Methods
 
     @TypeConverter
-    fun localDateToString(input: MediaType?): String? = input?.value
+    fun mediaTypeToString(input: MediaType?): String? = input?.value
 
     @TypeConverter
-    fun stringToLocalDate(input: String?): MediaType? =
+    fun stringToMediaType(input: String?): MediaType? =
         input?.let { MediaType.of(it) }
 
     // endregion Methods
