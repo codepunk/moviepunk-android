@@ -29,7 +29,8 @@ class TrendingMovieRemoteMediator @AssistedInject constructor(
     private val db: MoviePunkDatabase,
     private val webservice: MoviePunkWebservice,
     @Assisted private val mediaType: MediaType = MediaType.MOVIE,
-    @Assisted private val timeWindow: TimeWindow = TimeWindow.DAY
+    @Assisted private val timeWindow: TimeWindow = TimeWindow.DAY,
+    @Assisted private val pageLimit: Int = 0
 ) : RemoteMediator<Int, MovieWithGenres>() {
 
     // region Methods
@@ -87,7 +88,7 @@ class TrendingMovieRemoteMediator @AssistedInject constructor(
                 },
                 ifRight = { response -> response.results }
             )
-            val endOfPaginationReached = movies.isEmpty()
+            val endOfPaginationReached = (pageLimit > 0 && page >= pageLimit) || movies.isEmpty()
 
             // Save data and remote keys to database in a transaction
             db.withTransaction {

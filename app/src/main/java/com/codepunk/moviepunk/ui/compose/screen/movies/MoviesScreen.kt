@@ -40,10 +40,10 @@ fun MoviesScreen(
     sendIntent: (MoviesIntent) -> Unit = {}
 ) {
     LaunchedEffect(key1 = trendingMovies.loadState) {
-        /*
         Timber.i("trendingMovies.loadState = ${trendingMovies.loadState}")
+        /* TODO
         if (trendingMovies.loadState.refresh is LoadState.Error) {
-            "Hello"
+
         }
          */
     }
@@ -66,7 +66,7 @@ fun MoviesScreen(
                 }
             )
     ) {
-        if (false /*trendingMovies.loadState.refresh is LoadState.Loading*/) {
+        if (trendingMovies.loadState.refresh is LoadState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )

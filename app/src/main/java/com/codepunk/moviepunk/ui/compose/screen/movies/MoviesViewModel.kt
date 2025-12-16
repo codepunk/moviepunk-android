@@ -2,9 +2,11 @@ package com.codepunk.moviepunk.ui.compose.screen.movies
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.codepunk.moviepunk.core.CoreViewModel
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.model.Movie
+import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import com.codepunk.moviepunk.manager.NetworkConnectionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -85,9 +87,10 @@ class MoviesViewModel @Inject constructor(
     }
 
     private fun getTrendingMovies() {
-        /*
-        trendingMoviesFlow = repository.getTrendingMovies(TimeWindow.DAY).cachedIn(viewModelScope)
-         */
+        trendingMoviesFlow = repository.getTrendingMovies(
+            TimeWindow.DAY,
+            pageLimit = 1
+        ).cachedIn(viewModelScope)
     }
 
     override fun handleIntent(intent: MoviesIntent) {

@@ -22,7 +22,10 @@ interface MoviePunkRepository {
 
     suspend fun getFeaturedContent(currentId: Int): Either<RepositoryState, CuratedContentItem?>
 
-    fun getTrendingMovies(timeWindow: TimeWindow = TimeWindow.DAY): Flow<PagingData<Movie>>
+    fun getTrendingMovies(
+        timeWindow: TimeWindow = TimeWindow.DAY,
+        pageLimit: Int = 0
+    ): Flow<PagingData<Movie>>
 
     // endregion Methods
 

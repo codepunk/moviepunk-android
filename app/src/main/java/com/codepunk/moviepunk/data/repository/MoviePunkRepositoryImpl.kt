@@ -182,12 +182,17 @@ class MoviePunkRepositoryImpl(
             }
         }
 
-    override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
+    override fun getTrendingMovies(
+        timeWindow: TimeWindow,
+        pageLimit: Int
+    ): Flow<PagingData<Movie>> {
         // TODO Some way of caching this pager?
-        return trendingMoviePagerFactory.create(timeWindow)
-            .flow.map { pagingData ->
-                pagingData.map { it.toModel() }
-            }
+        return trendingMoviePagerFactory.create(
+            timeWindow = timeWindow,
+            pageLimit = pageLimit
+        ).flow.map { pagingData ->
+            pagingData.map { it.toModel() }
+        }
     }
 
     // endregion Methods

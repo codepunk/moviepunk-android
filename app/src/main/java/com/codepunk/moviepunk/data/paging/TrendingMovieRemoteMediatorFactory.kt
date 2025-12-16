@@ -12,6 +12,7 @@ interface TrendingMovieRemoteMediatorFactory {
     fun create(
         mediaType: MediaType = MediaType.MOVIE,
         timeWindow: TimeWindow = TimeWindow.DAY,
+        pageLimit: Int
     ): TrendingMovieRemoteMediator
 
     // endregion Methods

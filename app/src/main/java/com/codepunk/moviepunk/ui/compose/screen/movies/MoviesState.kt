@@ -1,7 +1,6 @@
 package com.codepunk.moviepunk.ui.compose.screen.movies
 
 import com.codepunk.moviepunk.domain.model.CuratedContentItem
-import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.repository.RepositoryState
 
 data class MoviesState(
@@ -10,7 +9,4 @@ data class MoviesState(
     val curatedContentLoading: Boolean = false,
     val featuredContentItem: CuratedContentItem? = null,
     val curatedContentError: RepositoryState? = null,
-    val genresLoading: Boolean = false,
-    val genres: List<Genre> = emptyList(),
-    val genresError: Throwable? = null,
 )

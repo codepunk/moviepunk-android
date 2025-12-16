@@ -18,11 +18,15 @@ class TrendingMoviePagerFactory @Inject constructor(
 
     // region Methods
 
-    fun create(timeWindow: TimeWindow): Pager<Int, MovieWithGenres> = Pager(
+    fun create(
+        timeWindow: TimeWindow,
+        pageLimit: Int
+    ): Pager<Int, MovieWithGenres> = Pager(
         config = pagingConfig,
         remoteMediator = remoteMediatorFactory.create(
             mediaType = MediaType.MOVIE,
-            timeWindow = timeWindow
+            timeWindow = timeWindow,
+            pageLimit = pageLimit
         ),
         pagingSourceFactory = { movieDao.getTrendingMoviePagingSource() }
     )
