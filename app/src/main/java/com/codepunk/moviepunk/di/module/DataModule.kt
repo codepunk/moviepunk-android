@@ -6,6 +6,7 @@ import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
+import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
 import com.codepunk.moviepunk.data.repository.MoviePunkRepositoryImpl
@@ -37,9 +38,7 @@ class DataModule {
         curatedContentDao: CuratedContentDao,
         genreDao: GenreDao,
         webservice: MoviePunkWebservice,
-        /*
         trendingMoviePagerFactory: TrendingMoviePagerFactory,
-         */
         webScraper: WebScraper
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         connectivityManager = connectivityManager,
@@ -47,10 +46,7 @@ class DataModule {
         curatedContentDao = curatedContentDao,
         genreDao = genreDao,
         webservice = webservice,
-        /*
-        movieDao = movieDao,
         trendingMoviePagerFactory = trendingMoviePagerFactory,
-         */
         webScraper = webScraper
     )
 

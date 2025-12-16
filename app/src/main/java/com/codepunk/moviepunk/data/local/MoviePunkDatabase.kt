@@ -6,6 +6,10 @@ import androidx.room.TypeConverters
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.GenreMediaTypeDao
+import com.codepunk.moviepunk.data.local.dao.MovieDao
+import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieRemoteKeyDao
 import com.codepunk.moviepunk.data.local.entity.CuratedContentItemEntity
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
 import com.codepunk.moviepunk.data.local.entity.GenreMediaTypeEntity
@@ -48,7 +52,6 @@ abstract class MoviePunkDatabase : RoomDatabase() {
 
     abstract fun genreMediaTypeDao(): GenreMediaTypeDao
 
-    /*
     abstract fun movieDao(): MovieDao
 
     abstract fun movieGenreXrefDao(): MovieGenreXrefDao
@@ -56,7 +59,6 @@ abstract class MoviePunkDatabase : RoomDatabase() {
     abstract fun trendingMovieDao(): TrendingMovieDao
 
     abstract fun trendingMovieRemoteKeyDao(): TrendingMovieRemoteKeyDao
-     */
 
     // endregion Methods
 

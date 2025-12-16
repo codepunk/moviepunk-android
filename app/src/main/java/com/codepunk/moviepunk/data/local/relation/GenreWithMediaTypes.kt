@@ -8,7 +8,6 @@ import com.codepunk.moviepunk.data.local.entity.GenreMediaTypeEntity
 data class GenreWithMediaTypes(
     @Embedded
     val genre: GenreEntity,
-
     @Relation(
         parentColumn = "id",
         entityColumn = "genre_id"

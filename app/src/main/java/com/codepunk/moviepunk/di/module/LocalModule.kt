@@ -6,6 +6,10 @@ import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.local.dao.GenreMediaTypeDao
+import com.codepunk.moviepunk.data.local.dao.MovieDao
+import com.codepunk.moviepunk.data.local.dao.MovieGenreXrefDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieDao
+import com.codepunk.moviepunk.data.local.dao.TrendingMovieRemoteKeyDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,7 +47,6 @@ object LocalModule {
     fun provideGenreMediaTypeDao(database: MoviePunkDatabase): GenreMediaTypeDao =
         database.genreMediaTypeDao()
 
-    /*
     @Provides
     @Singleton
     fun provideMovieDao(database: MoviePunkDatabase): MovieDao = database.movieDao()
@@ -65,7 +68,6 @@ object LocalModule {
     fun provideTrendingMovieRemoteKeyDao(
         database: MoviePunkDatabase
     ): TrendingMovieRemoteKeyDao = database.trendingMovieRemoteKeyDao()
-     */
 
     // endregion Methods
 

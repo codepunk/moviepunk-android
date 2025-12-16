@@ -3,6 +3,7 @@ package com.codepunk.moviepunk.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.withTransaction
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
 import com.codepunk.moviepunk.data.local.entity.GenreEntity
@@ -16,7 +17,9 @@ abstract class GenreDao(
 
     // region Variables
 
-    private val genreMediaTypeDao: GenreMediaTypeDao = db.genreMediaTypeDao()
+    private val genreMediaTypeDao: GenreMediaTypeDao by lazy {
+        db.genreMediaTypeDao()
+    }
 
     // endregion Variables
 
@@ -34,14 +37,14 @@ abstract class GenreDao(
 
     suspend fun insertWithMediaTypes(genreWidthMediaTypes: GenreWithMediaTypes) {
         db.withTransaction {
-            this.insert(genreWidthMediaTypes.genre)
+            insert(genreWidthMediaTypes.genre)
             genreMediaTypeDao.insertAll(genreWidthMediaTypes.mediaTypes)
         }
     }
 
     suspend fun insertAllWithMediaTypes(genresWithMediaTypes: List<GenreWithMediaTypes>) {
         db.withTransaction {
-            this.insertAll(
+            insertAll(
                 genresWithMediaTypes.map { it.genre }
             )
             genreMediaTypeDao.insertAll(
@@ -65,6 +68,7 @@ abstract class GenreDao(
     // Query
     // ====================
 
+    @Transaction
     @Query(value = """
         SELECT genre.*
         FROM genre

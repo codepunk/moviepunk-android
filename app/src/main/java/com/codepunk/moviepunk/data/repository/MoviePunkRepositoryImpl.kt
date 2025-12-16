@@ -2,6 +2,8 @@ package com.codepunk.moviepunk.data.repository
 
 import android.database.sqlite.SQLiteConstraintException
 import android.net.ConnectivityManager
+import androidx.paging.PagingData
+import androidx.paging.map
 import androidx.room.withTransaction
 import arrow.core.Either
 import arrow.core.raise.either
@@ -11,6 +13,7 @@ import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.mapper.toEntity
 import com.codepunk.moviepunk.data.mapper.toModel
+import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
 import com.codepunk.moviepunk.data.remote.dto.GenreDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
@@ -19,6 +22,8 @@ import com.codepunk.moviepunk.domain.model.CuratedContentItem
 import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.model.MediaType
+import com.codepunk.moviepunk.domain.model.Movie
+import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import com.codepunk.moviepunk.domain.repository.RepositoryState
 import com.codepunk.moviepunk.domain.repository.RepositoryState.ExceptionState
@@ -35,10 +40,7 @@ class MoviePunkRepositoryImpl(
     private val curatedContentDao: CuratedContentDao,
     private val genreDao: GenreDao,
     private val webservice: MoviePunkWebservice,
-    /*
-    private val movieDao: MovieDao,
     private val trendingMoviePagerFactory: TrendingMoviePagerFactory,
-     */
     private val webScraper: WebScraper
 ) : MoviePunkRepository {
 
@@ -180,15 +182,13 @@ class MoviePunkRepositoryImpl(
             }
         }
 
-    /*
     override fun getTrendingMovies(timeWindow: TimeWindow): Flow<PagingData<Movie>> {
         // TODO Some way of caching this pager?
         return trendingMoviePagerFactory.create(timeWindow)
             .flow.map { pagingData ->
-                pagingData.map { it.toMovie() }
+                pagingData.map { it.toModel() }
             }
     }
-     */
 
     // endregion Methods
 
