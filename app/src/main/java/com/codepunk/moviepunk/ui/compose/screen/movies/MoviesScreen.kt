@@ -2,9 +2,12 @@ package com.codepunk.moviepunk.ui.compose.screen.movies
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -17,7 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.PagingData
@@ -25,9 +32,14 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.SubcomposeAsyncImage
+import com.codepunk.moviepunk.R
+import com.codepunk.moviepunk.domain.model.CuratedContentItem
+import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
+import com.codepunk.moviepunk.ui.theme.dimens
+import com.codepunk.moviepunk.ui.theme.tmdbWhite
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
@@ -66,7 +78,7 @@ fun MoviesScreen(
                 }
             )
     ) {
-        if (trendingMovies.loadState.refresh is LoadState.Loading) {
+        if (!LocalInspectionMode.current && trendingMovies.loadState.refresh is LoadState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -76,22 +88,55 @@ fun MoviesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item {
-                    SubcomposeAsyncImage(
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        model = state.featuredContentItem?.url,
-                        contentDescription = "Curated Content Image",
-                        success = { successState ->
+                            .fillMaxWidth()
+                            .aspectRatio(880f / 600f)
+                    ) {
+                        if (LocalInspectionMode.current) {
                             Image(
-                                painter = successState.painter,
-                                contentDescription = contentDescription,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(880f / 600f)
+                                modifier = Modifier.fillMaxWidth(),
+                                contentDescription = "Curated Content Image",
+                                painter = painterResource(id = R.drawable.dummy_featured_item),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            SubcomposeAsyncImage(
+                                modifier = Modifier.fillMaxWidth(),
+                                model = state.featuredContentItem?.url,
+                                contentDescription = "Curated Content Image",
+                                success = { successState ->
+                                    Image(
+                                        painter = successState.painter,
+                                        contentDescription = contentDescription,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .aspectRatio(880f / 600f)
+                                    )
+                                }
                             )
                         }
-                    )
+
+                        Column(
+                            modifier = Modifier
+                                .padding(MaterialTheme.dimens.paddingStandard)
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.welcome),
+                                style = MaterialTheme.typography.displayLarge,
+                                fontWeight = FontWeight.Black,
+                                color = tmdbWhite
+                            )
+                            Text(
+                                text = stringResource(R.string.millions_of_movies),
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = tmdbWhite
+                            )
+                        }
+                    }
                 }
 
                 items(
@@ -149,13 +194,28 @@ fun MovieCard(
 @Composable
 fun MoviesScreenPreview() {
     MoviePunkTheme {
-        // Scaffold { padding ->
-        val emptyMovies = flowOf(PagingData.empty<Movie>()).collectAsLazyPagingItems()
-        MoviesScreen(
-            state = MoviesState(),
-            trendingMovies = emptyMovies,
-            modifier = Modifier //.padding(padding)
-        )
-        // }
+        Scaffold { padding ->
+            val state = MoviesState(
+                isConnected = true,
+                isLoadingAny = false,
+                curatedContentLoading = false,
+                featuredContentItem = CuratedContentItem(
+                    id = 1,
+                    label = "Movie",
+                    type = CuratedContentType.FEATURED,
+                    href = "",
+                    url = "",
+                ),
+                curatedContentError = null
+            )
+            val pagingData = PagingData
+                .from(emptyList<Movie>())
+            val emptyMovies = flowOf(pagingData).collectAsLazyPagingItems()
+            MoviesScreen(
+                state = state,
+                trendingMovies = emptyMovies,
+                modifier = Modifier.padding(padding)
+            )
+        }
     }
 }

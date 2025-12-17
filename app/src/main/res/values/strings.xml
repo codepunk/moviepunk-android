@@ -14,4 +14,7 @@
     <string name="top_rated">Top Rated</string>
     <string name="tv_shows">TV Shows</string>
     <string name="upcoming">Upcoming</string>
+
+    <string name="welcome">Welcome.</string>
+    <string name="millions_of_movies">Millions of movies, TV shows and people to discover. Explore now.</string>
 </resources>
