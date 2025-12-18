@@ -1,5 +1,6 @@
 package com.codepunk.moviepunk.data.remote.webservice
 
+import com.codepunk.moviepunk.data.remote.dto.ConfigurationDto
 import com.codepunk.moviepunk.data.remote.response.GenreListResponse
 import com.codepunk.moviepunk.data.remote.response.MoviePageResponse
 import com.codepunk.moviepunk.domain.model.MediaType
@@ -12,6 +13,13 @@ import retrofit2.http.Path
 interface MoviePunkWebservice {
 
     // region Methods
+
+    // ====================
+    // Configuration
+    // ====================
+
+    @GET("configuration")
+    suspend fun fetchConfiguration(): Response<ConfigurationDto>
 
     // ====================
     // Genres

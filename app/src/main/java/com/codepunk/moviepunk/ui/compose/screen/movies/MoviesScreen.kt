@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +32,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.codepunk.moviepunk.R
 import com.codepunk.moviepunk.domain.model.CuratedContentItem
@@ -39,6 +41,8 @@ import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
 import com.codepunk.moviepunk.ui.theme.dimens
+import com.codepunk.moviepunk.ui.theme.movieCardHeight
+import com.codepunk.moviepunk.ui.theme.movieCardWidth
 import com.codepunk.moviepunk.ui.theme.tmdbWhite
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
@@ -51,6 +55,10 @@ fun MoviesScreen(
     @Suppress("unused")
     sendIntent: (MoviesIntent) -> Unit = {}
 ) {
+    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+
     LaunchedEffect(key1 = trendingMovies.loadState) {
         Timber.i("trendingMovies.loadState = ${trendingMovies.loadState}")
         /* TODO
@@ -60,13 +68,7 @@ fun MoviesScreen(
          */
     }
 
-    Timber.d("curatedContentItem = ${state.featuredContentItem}")
-
     val pullToRefreshState: PullToRefreshState = rememberPullToRefreshState()
-
-    val configuration = LocalConfiguration.current
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -139,29 +141,10 @@ fun MoviesScreen(
                     }
                 }
 
-                items(
-                    count = trendingMovies.itemCount,
-                    key = trendingMovies.itemKey { it.id }
-                ) { index ->
-                    trendingMovies[index]?.also { movie ->
-                        MovieCard(
-                            movie = movie
-                        )
-                    }
-                }
-
                 item {
-                    if (trendingMovies.loadState.append is LoadState.Loading) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                    }
+                    TrendingSection(
+                        trendingMovies = trendingMovies
+                    )
                 }
             }
         }
@@ -175,15 +158,62 @@ fun MoviesScreen(
 }
 
 @Composable
-fun MovieCard(
+fun TrendingSection(
+    trendingMovies: LazyPagingItems<Movie>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.paddingLarge)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.dimens.paddingXLarge)
+        ) {
+            Text(
+                text = stringResource(R.string.trending),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = modifier
+            )
+        }
+
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.paddingXLarge),
+            contentPadding = PaddingValues(horizontal = MaterialTheme.dimens.paddingXLarge)
+        ) {
+            items(
+                count = trendingMovies.itemCount,
+                key = trendingMovies.itemKey { it.id }
+            ) { index ->
+                trendingMovies[index]?.also { movie ->
+                    MoviePreviewView(
+                        movie = movie
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MoviePreviewView(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
-            .fillMaxWidth()
-            .height(150.dp)
+            .size(movieCardWidth, movieCardHeight)
     ) {
+        // TODO TEMP
+        val url = "https://media.themoviedb.org/t/p/w440_and_h660_face/" + movie.posterPath
+        AsyncImage(
+            model = url,
+            contentDescription = movie.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
         Text(
             text = movie.title
         )

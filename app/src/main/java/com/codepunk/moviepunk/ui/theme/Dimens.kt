@@ -75,3 +75,6 @@ val regionLarge = 224.dp
 val regionXLarge = 256.dp
 val region2xLarge = 384.dp
 val region3xLarge = 512.dp
+
+val movieCardWidth = 150.dp
+val movieCardHeight = 225.dp

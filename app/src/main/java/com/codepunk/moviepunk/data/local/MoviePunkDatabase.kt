@@ -18,6 +18,7 @@ import com.codepunk.moviepunk.data.local.entity.MovieGenreXefEntity
 import com.codepunk.moviepunk.data.local.entity.TrendingMovieEntity
 import com.codepunk.moviepunk.data.local.entity.TrendingMovieRemoteKeyEntity
 import com.codepunk.moviepunk.data.local.typeconverter.CuratedContentTypeTypeConverter
+import com.codepunk.moviepunk.data.local.typeconverter.ImageSizeTypeTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.InstantTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.LocalDateTypeConverter
 import com.codepunk.moviepunk.data.local.typeconverter.MediaTypeTypeConverter
@@ -38,6 +39,7 @@ import com.codepunk.moviepunk.data.local.typeconverter.MediaTypeTypeConverter
     value = [
         CuratedContentTypeTypeConverter::class,
         InstantTypeConverter::class,
+        ImageSizeTypeTypeConverter::class,
         LocalDateTypeConverter::class,
         MediaTypeTypeConverter::class
     ]

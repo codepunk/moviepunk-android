@@ -17,15 +17,15 @@ import androidx.room.Index
             entity = MovieEntity::class,
             parentColumns = ["id"],
             childColumns = ["movie_id"],
-            onDelete = ForeignKey.Companion.CASCADE,
-            onUpdate = ForeignKey.Companion.CASCADE
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = GenreEntity::class,
             parentColumns = ["id"],
             childColumns = ["genre_id"],
-            onDelete = ForeignKey.Companion.CASCADE,
-            onUpdate = ForeignKey.Companion.CASCADE
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
         )
     ]
 )
