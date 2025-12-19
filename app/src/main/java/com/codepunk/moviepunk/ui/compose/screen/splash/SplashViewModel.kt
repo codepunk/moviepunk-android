@@ -22,17 +22,20 @@ class SplashViewModel @Inject constructor(
     private val maximumTimeFlow = MutableStateFlow(false)
 
     val syncCompleteFlow = combine(
+        syncManager.syncConfigurationFlow,
         syncManager.syncGenresFlow,
         syncManager.syncCuratedContentFlow,
         minimumTimeFlow,
         maximumTimeFlow
     ) {genreResult,
+       configurationResult,
        curatedContentResult,
        minimumTimeReached,
        maximumTimeReached ->
         when {
             !minimumTimeReached -> false
             maximumTimeReached -> true
+            configurationResult.leftOrNull() == UninitializedState -> false
             genreResult.leftOrNull() == UninitializedState -> false
             curatedContentResult.leftOrNull() == UninitializedState -> false
             else -> true

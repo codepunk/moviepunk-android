@@ -12,6 +12,8 @@ interface MoviePunkRepository {
 
     // region Methods
 
+    suspend fun syncConfiguration(): Either<RepositoryState, Boolean>
+
     suspend fun syncGenres(): Either<RepositoryState, Boolean>
 
     fun getGenres(): Flow<List<Genre>>

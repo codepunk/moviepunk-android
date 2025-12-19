@@ -9,8 +9,10 @@ import arrow.core.Either
 import arrow.core.raise.either
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.ConfigurationDao
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
+import com.codepunk.moviepunk.data.mapper.toEntities
 import com.codepunk.moviepunk.data.mapper.toEntity
 import com.codepunk.moviepunk.data.mapper.toModel
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
@@ -37,6 +39,7 @@ import kotlin.time.Duration.Companion.minutes
 class MoviePunkRepositoryImpl(
     private val connectivityManager: ConnectivityManager,
     private val db: MoviePunkDatabase,
+    private val configurationDao: ConfigurationDao,
     private val curatedContentDao: CuratedContentDao,
     private val genreDao: GenreDao,
     private val webservice: MoviePunkWebservice,
@@ -45,6 +48,44 @@ class MoviePunkRepositoryImpl(
 ) : MoviePunkRepository {
 
     // region Methods
+
+    override suspend fun syncConfiguration(): Either<RepositoryState, Boolean> {
+        var dataUpdated = false
+        return either {
+            networkBoundResource(
+                query = { configurationDao.getAll() },
+                fetch = {
+                    if (!connectivityManager.isConnected) {
+                        raise(RepositoryState.NoConnectivityState)
+                    }
+                    webservice.fetchConfiguration().toApiEither().bind()
+                },
+                shouldFetch = { entities ->
+                    if (entities.isEmpty()) {
+                        true
+                    } else {
+                        val oldest = entities.minBy { it.createdAt }.createdAt
+                        val now = Clock.System.now()
+                        now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
+                    }
+                },
+                saveFetchResult = { dto ->
+                    dataUpdated = try {
+                        db.withTransaction {
+                            configurationDao.deleteAll()
+                            configurationDao.insertAll(dto.toEntities())
+                            true
+                        }
+                    } catch (e: SQLiteConstraintException) {
+                        raise(ExceptionState(e))
+                    }
+                },
+                transform = { entities ->
+                    entities.toModel()
+                }
+            )
+        }.map { dataUpdated }
+    }
 
     override suspend fun syncGenres(): Either<RepositoryState, Boolean> {
         var dataUpdated = false

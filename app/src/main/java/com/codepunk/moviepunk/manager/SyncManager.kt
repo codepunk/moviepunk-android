@@ -28,6 +28,10 @@ class SyncManager @Inject constructor(
     // TODO Make flows that track when each sync is complete. Is there a way to have a retry
     //  on those syncs if they fail?
 
+    private val _syncConfigurationFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+        MutableStateFlow(UninitializedState.left())
+    val syncConfigurationFlow = _syncConfigurationFlow.asStateFlow()
+
     private val _syncGenresFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
         MutableStateFlow(UninitializedState.left())
     val syncGenresFlow = _syncGenresFlow.asStateFlow()
@@ -40,6 +44,9 @@ class SyncManager @Inject constructor(
         applicationScope.launch(defaultDispatcher) {
             networkConnectionManager.connectionStateFlow.collect { isConnected ->
                 if (isConnected) {
+                    if (syncConfigurationFlow.value.isLeft()) {
+                        syncConfiguration()
+                    }
                     if (syncGenresFlow.value.isLeft()) {
                         syncGenres()
                     }
@@ -48,6 +55,12 @@ class SyncManager @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun syncConfiguration() {
+        applicationScope.launch(ioDispatcher) {
+            _syncConfigurationFlow.value = repository.syncConfiguration()
         }
     }
 

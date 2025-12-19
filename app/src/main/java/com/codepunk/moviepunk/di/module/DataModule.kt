@@ -4,6 +4,7 @@ import android.net.ConnectivityManager
 import androidx.paging.PagingConfig
 import com.codepunk.moviepunk.BuildConfig
 import com.codepunk.moviepunk.data.local.MoviePunkDatabase
+import com.codepunk.moviepunk.data.local.dao.ConfigurationDao
 import com.codepunk.moviepunk.data.local.dao.CuratedContentDao
 import com.codepunk.moviepunk.data.local.dao.GenreDao
 import com.codepunk.moviepunk.data.paging.TrendingMoviePagerFactory
@@ -35,6 +36,7 @@ class DataModule {
     fun provideMoviePunkRepository(
         connectivityManager: ConnectivityManager,
         db: MoviePunkDatabase,
+        configurationDao: ConfigurationDao,
         curatedContentDao: CuratedContentDao,
         genreDao: GenreDao,
         webservice: MoviePunkWebservice,
@@ -43,6 +45,7 @@ class DataModule {
     ): MoviePunkRepository = MoviePunkRepositoryImpl(
         connectivityManager = connectivityManager,
         db = db,
+        configurationDao = configurationDao,
         curatedContentDao = curatedContentDao,
         genreDao = genreDao,
         webservice = webservice,
