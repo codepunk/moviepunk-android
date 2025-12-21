@@ -20,6 +20,7 @@ import com.codepunk.moviepunk.data.remote.dto.GenreDto
 import com.codepunk.moviepunk.data.remote.util.WebScraper
 import com.codepunk.moviepunk.data.remote.util.toApiEither
 import com.codepunk.moviepunk.data.remote.webservice.MoviePunkWebservice
+import com.codepunk.moviepunk.domain.model.Configuration
 import com.codepunk.moviepunk.domain.model.CuratedContentItem
 import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.model.Genre
@@ -49,87 +50,156 @@ class MoviePunkRepositoryImpl(
 
     // region Methods
 
-    override suspend fun syncConfiguration(): Either<RepositoryState, Boolean> {
-        var dataUpdated = false
-        return either {
-            networkBoundResource(
-                query = { configurationDao.getAll() },
-                fetch = {
-                    if (!connectivityManager.isConnected) {
-                        raise(RepositoryState.NoConnectivityState)
-                    }
-                    webservice.fetchConfiguration().toApiEither().bind()
-                },
-                shouldFetch = { entities ->
-                    if (entities.isEmpty()) {
-                        true
-                    } else {
-                        val oldest = entities.minBy { it.createdAt }.createdAt
-                        val now = Clock.System.now()
-                        now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
-                    }
-                },
-                saveFetchResult = { dto ->
-                    dataUpdated = try {
-                        db.withTransaction {
-                            configurationDao.deleteAll()
-                            configurationDao.insertAll(dto.toEntities())
-                            true
-                        }
-                    } catch (e: SQLiteConstraintException) {
-                        raise(ExceptionState(e))
-                    }
-                },
-                transform = { entities ->
-                    entities.toModel()
+    override suspend fun getGenres(): Either<RepositoryState, List<Genre>> = either {
+        networkBoundResource(
+            query = { genreDao.getAll() },
+            fetch = {
+                if (!connectivityManager.isConnected) {
+                    raise(RepositoryState.NoConnectivityState)
                 }
-            )
-        }.map { dataUpdated }
+                val movieGenres = webservice.fetchGenres(MediaType.MOVIE)
+                    .toApiEither().bind().genres
+                    .map { it.copy(mediaTypes = listOf(MediaType.MOVIE)) }
+                val tvGenres = webservice.fetchGenres(MediaType.TV)
+                    .toApiEither().bind().genres
+                    .map { it.copy(mediaTypes = listOf(MediaType.TV)) }
+                (movieGenres + tvGenres)
+                    .groupBy { dto ->
+                        dto.id
+                    }.map { (id, dtos) ->
+                        GenreDto(
+                            id = id,
+                            name = dtos.firstOrNull()?.name.orEmpty(),
+                            mediaTypes = dtos.map { it.mediaTypes }.flatten()
+                        )
+                    }
+            },
+            shouldFetch = { entities ->
+                if (entities.isEmpty()) {
+                    true
+                } else {
+                    val oldest = entities.minBy { it.genre.createdAt }.genre.createdAt
+                    val now = Clock.System.now()
+                    now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
+                }
+            },
+            saveFetchResult = { dtos ->
+                try {
+                    db.withTransaction {
+                        genreDao.deleteAll()
+                        genreDao.insertAllWithMediaTypes(
+                            dtos.map { it.toEntity() }
+                        )
+                    }
+                } catch (e: SQLiteConstraintException) {
+                    raise(ExceptionState(e))
+                }
+            },
+            transform = { entities ->
+                entities.map { it.toModel() }
+            }
+        )
     }
 
-    override suspend fun syncGenres(): Either<RepositoryState, Boolean> {
-        var dataUpdated = false
-        return either {
+    override suspend fun getConfiguration(): Either<RepositoryState, Configuration> = either {
+        networkBoundResource(
+            query = { configurationDao.getAll() },
+            fetch = {
+                if (!connectivityManager.isConnected) {
+                    raise(RepositoryState.NoConnectivityState)
+                }
+                webservice.fetchConfiguration().toApiEither().bind()
+            },
+            shouldFetch = { entities ->
+                if (entities.isEmpty()) {
+                    true
+                } else {
+                    val oldest = entities.minBy { it.createdAt }.createdAt
+                    val now = Clock.System.now()
+                    now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
+                }
+            },
+            saveFetchResult = { dto ->
+                try {
+                    db.withTransaction {
+                        configurationDao.deleteAll()
+                        configurationDao.insertAll(dto.toEntities())
+                    }
+                } catch (e: SQLiteConstraintException) {
+                    raise(ExceptionState(e))
+                }
+            },
+            transform = { entities ->
+                entities.toModel()
+            }
+        )
+    }
+
+    override suspend fun getCuratedContent(): Either<RepositoryState, List<CuratedContentItem>> =
+        either {
             networkBoundResource(
-                query = { genreDao.getAll() },
+                query = { curatedContentDao.getAll() },
                 fetch = {
                     if (!connectivityManager.isConnected) {
                         raise(RepositoryState.NoConnectivityState)
                     }
-                    val movieGenres = webservice.fetchGenres(MediaType.MOVIE)
-                        .toApiEither().bind().genres
-                        .map { it.copy(mediaTypes = listOf(MediaType.MOVIE)) }
-                    val tvGenres = webservice.fetchGenres(MediaType.TV)
-                        .toApiEither().bind().genres
-                        .map { it.copy(mediaTypes = listOf(MediaType.TV)) }
-                    (movieGenres + tvGenres)
-                        .groupBy { dto ->
-                            dto.id
-                        }.map { (id, dtos) ->
-                            GenreDto(
-                                id = id,
-                                name = dtos.firstOrNull()?.name.orEmpty(),
-                                mediaTypes = dtos.map { it.mediaTypes }.flatten()
-                            )
-                        }
-                },
-                shouldFetch = { entities ->
-                    if (entities.isEmpty()) {
-                        true
+
+                    // 1. Get the remote CSS Hrefs
+                    val cssUris = webScraper.getCssUris(
+                        urlString = BuildConfig.TMDB_URL
+                    ).toApiEither().bind()
+
+                    // 2. Find mobile and non-mobile hrefs (there should only be one of each)
+                    val standardCssUri = cssUris.find { !it.pathSegments.contains(MOBILE) }
+                    val mobileCssUri = cssUris.find { it.pathSegments.contains(MOBILE) }
+
+                    // 3. Fetch featured content
+                    val networkFeaturedCssHref = mobileCssUri?.toString().orEmpty()
+                    val cachedFeaturedCssHref = curatedContentDao.getHref(
+                        type = CuratedContentType.FEATURED.value
+                    )
+                    val featured = if (networkFeaturedCssHref != cachedFeaturedCssHref) {
+                        val response = webScraper.scrapeUrlForFeaturedContent(
+                            baseUrl = BuildConfig.TMDB_URL,
+                            cssHref = networkFeaturedCssHref
+                        ).toApiEither().bind()
+                        response.content
                     } else {
-                        val oldest = entities.minBy { it.genre.createdAt }.genre.createdAt
-                        val now = Clock.System.now()
-                        now - oldest > BuildConfig.DATA_REFRESH_DURATION_MINUTES.minutes
+                        emptyList()
                     }
+
+                    // 4. Fetch community content
+                    val networkCommunityCssHref = standardCssUri?.toString().orEmpty()
+                    val cachedCommunityCssHref = curatedContentDao.getHref(
+                        type = CuratedContentType.COMMUNITY.value
+                    )
+                    val community = if (networkCommunityCssHref != cachedCommunityCssHref) {
+                        val response = webScraper.scrapeUrlForCommunityContent(
+                            baseUrl = BuildConfig.TMDB_URL,
+                            cssHref = networkCommunityCssHref
+                        ).toApiEither().bind()
+                        response.content
+                    } else {
+                        emptyList()
+                    }
+
+                    mapOf(
+                        CuratedContentType.FEATURED to featured,
+                        CuratedContentType.COMMUNITY to community
+                    )
                 },
-                saveFetchResult = { dtos ->
-                    dataUpdated = try {
+                shouldFetch = { true },
+                saveFetchResult = { dtoMap ->
+                    try {
                         db.withTransaction {
-                            genreDao.deleteAll()
-                            genreDao.insertAllWithMediaTypes(
-                                dtos.map { it.toEntity() }
-                            )
-                            true
+                            CuratedContentType.entries.forEach { type ->
+                                dtoMap[type]?.also { content ->
+                                    curatedContentDao.deleteAll(type.value)
+                                    curatedContentDao.insertAll(
+                                        content.map { it.toEntity() }
+                                    )
+                                }
+                            }
                         }
                     } catch (e: SQLiteConstraintException) {
                         raise(ExceptionState(e))
@@ -139,80 +209,9 @@ class MoviePunkRepositoryImpl(
                     entities.map { it.toModel() }
                 }
             )
-        }.map { dataUpdated }
-    }
-
-    override fun getGenres(): Flow<List<Genre>> = genreDao.getAll().map { entities ->
-        entities.map { it.toModel() }
-    }
-
-    override suspend fun syncCuratedContent(): Either<RepositoryState, Boolean> = either {
-        // 1. Get the remote CSS Hrefs
-        val cssUris = webScraper.getCssUris(
-            urlString = BuildConfig.TMDB_URL
-        ).toApiEither().bind()
-
-        // 2. Find mobile and non-mobile hrefs (there should only be one of each)
-        val standardCssUri = cssUris.find { !it.pathSegments.contains(MOBILE) }
-        val mobileCssUri = cssUris.find { it.pathSegments.contains(MOBILE) }
-
-        // 3. Fetch featured content
-        val networkFeaturedCssHref = mobileCssUri?.toString().orEmpty()
-        val cachedFeaturedCssHref = curatedContentDao.getHref(
-            type = CuratedContentType.FEATURED.value
-        )
-        val featured = if (networkFeaturedCssHref != cachedFeaturedCssHref) {
-            val response = webScraper.scrapeUrlForFeaturedContent(
-                baseUrl = BuildConfig.TMDB_URL,
-                cssHref = networkFeaturedCssHref
-            ).toApiEither().bind()
-            response.content
-        } else {
-            emptyList()
         }
 
-        // 4. Fetch community content
-        val networkCommunityCssHref = standardCssUri?.toString().orEmpty()
-        val cachedCommunityCssHref = curatedContentDao.getHref(
-            type = CuratedContentType.COMMUNITY.value
-        )
-        val community = if (networkCommunityCssHref != cachedCommunityCssHref) {
-            val response = webScraper.scrapeUrlForCommunityContent(
-                baseUrl = BuildConfig.TMDB_URL,
-                cssHref = networkCommunityCssHref
-            ).toApiEither().bind()
-            response.content
-        } else {
-            emptyList()
-        }
-
-        // Save any newly-fetched content
-        try {
-            var dataUpdated = false
-            db.withTransaction {
-                if (featured.isNotEmpty()) {
-                    curatedContentDao.deleteAll(CuratedContentType.FEATURED.value)
-                    curatedContentDao.insertAll(featured.map { it.toEntity() })
-                    dataUpdated = true
-                }
-                if (community.isNotEmpty()) {
-                    curatedContentDao.deleteAll(CuratedContentType.COMMUNITY.value)
-                    curatedContentDao.insertAll(community.map { it.toEntity() })
-                    dataUpdated = true
-                }
-            }
-            dataUpdated
-        } catch (e: SQLiteConstraintException) {
-            raise(ExceptionState(e))
-        }
-    }
-
-    override suspend fun getCuratedContent(): Flow<List<CuratedContentItem>> =
-        curatedContentDao.getAll().map { entities ->
-            entities.map { it.toModel() }
-        }
-
-    override suspend fun getFeaturedContent(
+    override suspend fun getFeaturedContentItem(
         currentId: Int
     ): Either<RepositoryState, CuratedContentItem?> =
         either {

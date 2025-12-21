@@ -76,7 +76,7 @@ class MoviesViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             state = state.copy(curatedContentLoading = true)
             val currentId = state.featuredContentItem?.id ?: 0
-            val result = repository.getFeaturedContent(currentId)
+            val result = repository.getFeaturedContentItem(currentId)
             state = state.copy(curatedContentLoading = false)
             result.onRight { curatedContentItem ->
                 state = state.copy(

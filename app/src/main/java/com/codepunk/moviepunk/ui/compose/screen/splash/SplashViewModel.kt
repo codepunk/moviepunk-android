@@ -3,7 +3,7 @@ package com.codepunk.moviepunk.ui.compose.screen.splash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codepunk.moviepunk.domain.repository.RepositoryState.UninitializedState
-import com.codepunk.moviepunk.manager.SyncManager
+import com.codepunk.moviepunk.manager.ConfigurationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    syncManager: SyncManager
+    configurationManager: ConfigurationManager
 ) : ViewModel() {
 
     // region Variables
@@ -22,9 +22,9 @@ class SplashViewModel @Inject constructor(
     private val maximumTimeFlow = MutableStateFlow(false)
 
     val syncCompleteFlow = combine(
-        syncManager.syncConfigurationFlow,
-        syncManager.syncGenresFlow,
-        syncManager.syncCuratedContentFlow,
+        configurationManager.configurationFlow,
+        configurationManager.genresFlow,
+        configurationManager.curatedContentFlow,
         minimumTimeFlow,
         maximumTimeFlow
     ) {genreResult,

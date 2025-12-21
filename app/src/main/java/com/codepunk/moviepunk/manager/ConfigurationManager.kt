@@ -5,6 +5,9 @@ import arrow.core.left
 import com.codepunk.moviepunk.di.qualifier.ApplicationScope
 import com.codepunk.moviepunk.di.qualifier.DefaultDispatcher
 import com.codepunk.moviepunk.di.qualifier.IoDispatcher
+import com.codepunk.moviepunk.domain.model.Configuration
+import com.codepunk.moviepunk.domain.model.CuratedContentItem
+import com.codepunk.moviepunk.domain.model.Genre
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
 import com.codepunk.moviepunk.domain.repository.RepositoryState
 import com.codepunk.moviepunk.domain.repository.RepositoryState.UninitializedState
@@ -18,7 +21,7 @@ import javax.inject.Inject
 // TODO When are we "done"? Maybe a bunch of flows for each sync and one "master" flow
 //   that combines them all? Is that overkill?
 
-class SyncManager @Inject constructor(
+class ConfigurationManager @Inject constructor(
     @param:ApplicationScope private val applicationScope: CoroutineScope,
     @DefaultDispatcher defaultDispatcher: CoroutineDispatcher,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
@@ -28,51 +31,51 @@ class SyncManager @Inject constructor(
     // TODO Make flows that track when each sync is complete. Is there a way to have a retry
     //  on those syncs if they fail?
 
-    private val _syncConfigurationFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+    private val _genresFlow: MutableStateFlow<Either<RepositoryState, List<Genre>>> =
         MutableStateFlow(UninitializedState.left())
-    val syncConfigurationFlow = _syncConfigurationFlow.asStateFlow()
+    val genresFlow = _genresFlow.asStateFlow()
 
-    private val _syncGenresFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+    private val _configurationFlow: MutableStateFlow<Either<RepositoryState, Configuration>> =
         MutableStateFlow(UninitializedState.left())
-    val syncGenresFlow = _syncGenresFlow.asStateFlow()
+    val configurationFlow = _configurationFlow.asStateFlow()
 
-    private val _syncCuratedContentFlow: MutableStateFlow<Either<RepositoryState, Boolean>> =
+    private val _curatedContentFlow: MutableStateFlow<Either<RepositoryState, List<CuratedContentItem>>> =
         MutableStateFlow(UninitializedState.left())
-    val syncCuratedContentFlow = _syncCuratedContentFlow.asStateFlow()
+    val curatedContentFlow = _curatedContentFlow.asStateFlow()
 
     init {
         applicationScope.launch(defaultDispatcher) {
             networkConnectionManager.connectionStateFlow.collect { isConnected ->
                 if (isConnected) {
-                    if (syncConfigurationFlow.value.isLeft()) {
-                        syncConfiguration()
+                    if (genresFlow.value.isLeft()) {
+                        getGenres()
                     }
-                    if (syncGenresFlow.value.isLeft()) {
-                        syncGenres()
+                    if (configurationFlow.value.isLeft()) {
+                        getConfiguration()
                     }
-                    if (syncCuratedContentFlow.value.isLeft()) {
-                        syncCuratedContent()
+                    if (curatedContentFlow.value.isLeft()) {
+                        getCuratedContent()
                     }
                 }
             }
         }
     }
 
-    private fun syncConfiguration() {
+    private fun getGenres() {
         applicationScope.launch(ioDispatcher) {
-            _syncConfigurationFlow.value = repository.syncConfiguration()
+            _genresFlow.value = repository.getGenres()
         }
     }
 
-    private fun syncGenres() {
+    private fun getConfiguration() {
         applicationScope.launch(ioDispatcher) {
-            _syncGenresFlow.value = repository.syncGenres()
+            _configurationFlow.value = repository.getConfiguration()
         }
     }
 
-    private fun syncCuratedContent() {
+    private fun getCuratedContent() {
         applicationScope.launch(ioDispatcher) {
-            _syncCuratedContentFlow.value = repository.syncCuratedContent()
+            _curatedContentFlow.value = repository.getCuratedContent()
         }
     }
 

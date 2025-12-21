@@ -8,7 +8,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.codepunk.moviepunk.manager.SyncManager
+import com.codepunk.moviepunk.manager.ConfigurationManager
 import com.codepunk.moviepunk.manager.UserSessionManager
 import com.codepunk.moviepunk.session.UserSession.Authenticated
 import com.codepunk.moviepunk.ui.compose.Navigation
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var syncManager: SyncManager
+    lateinit var configurationManager: ConfigurationManager
 
     @Inject
     lateinit var userSessionManager: UserSessionManager
