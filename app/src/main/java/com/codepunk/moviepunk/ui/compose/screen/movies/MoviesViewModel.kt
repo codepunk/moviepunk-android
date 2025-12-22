@@ -8,6 +8,7 @@ import com.codepunk.moviepunk.di.qualifier.IoDispatcher
 import com.codepunk.moviepunk.domain.model.Movie
 import com.codepunk.moviepunk.domain.model.TimeWindow
 import com.codepunk.moviepunk.domain.repository.MoviePunkRepository
+import com.codepunk.moviepunk.manager.ConfigurationManager
 import com.codepunk.moviepunk.manager.NetworkConnectionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,6 +30,7 @@ import javax.inject.Inject
 class MoviesViewModel @Inject constructor(
     private val networkConnectionManager: NetworkConnectionManager,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val configurationManager: ConfigurationManager,
     private val repository: MoviePunkRepository
 ) : CoreViewModel<MoviesIntent, MoviesMessage>() {
 
@@ -50,6 +52,7 @@ class MoviesViewModel @Inject constructor(
 
     init {
         monitorNetworkConnection()
+        getConfiguration()
         refresh()
     }
 
@@ -63,6 +66,18 @@ class MoviesViewModel @Inject constructor(
                 state = state.copy(
                     isConnected = isConnected
                 )
+            }
+        }
+    }
+
+    private fun getConfiguration() {
+        viewModelScope.launch {
+            configurationManager.configurationFlow.collect { result ->
+                result.onRight { configuration ->
+                    state = state.copy(
+                        configuration = configuration
+                    )
+                }
             }
         }
     }

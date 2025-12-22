@@ -1,16 +1,16 @@
 package com.codepunk.moviepunk.domain.model
 
 data class Configuration(
-    val changeKeys: List<String>,
-    val images: ConfigurationImages
+    val changeKeys: List<String> = emptyList(),
+    val images: ConfigurationImages = ConfigurationImages()
 ) {
     data class ConfigurationImages(
-        val baseUrl: String,
-        val secureBaseUrl: String,
-        val backdropSizes: List<String>,
-        val logoSizes: List<String>,
-        val posterSizes: List<String>,
-        val profileSizes: List<String>,
-        val stillSizes: List<String>,
+        val baseUrl: String = "",
+        val secureBaseUrl: String = "",
+        val backdropSizes: List<String> = emptyList(),
+        val logoSizes: List<String> = emptyList(),
+        val posterSizes: List<String> = emptyList(),
+        val profileSizes: List<String> = emptyList(),
+        val stillSizes: List<String> = emptyList(),
     )
 }
