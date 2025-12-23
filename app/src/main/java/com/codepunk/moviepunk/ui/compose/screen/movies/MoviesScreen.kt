@@ -96,61 +96,19 @@ fun MoviesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item {
-                    Box(
+                    WelcomeSection(
+                        featuredContentItem = state.featuredContentItem,
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(880f / 600f)
-                    ) {
-                        if (LocalInspectionMode.current) {
-                            Image(
-                                modifier = Modifier.fillMaxWidth(),
-                                contentDescription = "Curated Content Image",
-                                painter = painterResource(id = R.drawable.dummy_featured_item),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            SubcomposeAsyncImage(
-                                modifier = Modifier.fillMaxWidth(),
-                                model = state.featuredContentItem?.url,
-                                contentDescription = "Curated Content Image",
-                                success = { successState ->
-                                    Image(
-                                        painter = successState.painter,
-                                        contentDescription = contentDescription,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .aspectRatio(880f / 600f)
-                                    )
-                                }
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .padding(MaterialTheme.dimens.paddingStandard)
-                                .fillMaxSize(),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.welcome),
-                                style = MaterialTheme.typography.displayLarge,
-                                fontWeight = FontWeight.Black,
-                                color = tmdbWhite
-                            )
-                            Text(
-                                text = stringResource(R.string.millions_of_movies),
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = tmdbWhite
-                            )
-                        }
-                    }
+                    )
                 }
 
                 item {
                     TrendingSection(
                         configuration = state.configuration,
-                        trendingMovies = trendingMovies
+                        trendingMovies = trendingMovies,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -165,13 +123,67 @@ fun MoviesScreen(
 }
 
 @Composable
+fun WelcomeSection(
+    modifier: Modifier = Modifier,
+    featuredContentItem: CuratedContentItem?
+) {
+    Box(
+        modifier = modifier
+    ) {
+        if (LocalInspectionMode.current) {
+            Image(
+                modifier = Modifier.fillMaxWidth(),
+                contentDescription = "Curated Content Image",
+                painter = painterResource(id = R.drawable.dummy_featured_item),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            SubcomposeAsyncImage(
+                modifier = Modifier.fillMaxWidth(),
+                model = featuredContentItem?.url,
+                contentDescription = "Curated Content Image",
+                success = { successState ->
+                    Image(
+                        painter = successState.painter,
+                        contentDescription = contentDescription,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(880f / 600f)
+                    )
+                }
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .padding(MaterialTheme.dimens.paddingStandard)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.welcome),
+                style = MaterialTheme.typography.displayLarge,
+                fontWeight = FontWeight.Black,
+                color = tmdbWhite
+            )
+            Text(
+                text = stringResource(R.string.millions_of_movies),
+                style = MaterialTheme.typography.headlineLarge,
+                color = tmdbWhite
+            )
+        }
+    }
+}
+
+@Composable
 fun TrendingSection(
     configuration: Configuration,
     trendingMovies: LazyPagingItems<Movie>,
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
 
         Column(
@@ -193,15 +205,15 @@ fun TrendingSection(
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(
-                    modifier = Modifier.matchParentSize()
+                Box(
+                    modifier = Modifier.matchParentSize(),
+                    contentAlignment = Alignment.BottomCenter
                 ) {
-                    Spacer(modifier = Modifier.weight(1f))
                     Image(
                         modifier = Modifier
                             .padding(top = MaterialTheme.dimens.paddingXLarge)
                             .fillMaxWidth()
-                            .weight(3f),
+                            .fillMaxHeight(0.75f),
                         painter = painterResource(R.drawable.trending_background),
                         contentDescription = null,
                         contentScale = ContentScale.FillHeight,
