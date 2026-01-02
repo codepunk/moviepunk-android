@@ -78,3 +78,4 @@ val region3xLarge = 512.dp
 
 val movieCardWidth = 150.dp
 val movieCardHeight = 225.dp
+val movieRatingCircleSize = (80 / 3.0f).dp

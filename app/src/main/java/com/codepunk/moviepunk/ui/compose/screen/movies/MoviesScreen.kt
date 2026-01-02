@@ -2,10 +2,8 @@ package com.codepunk.moviepunk.ui.compose.screen.movies
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,19 +28,16 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.codepunk.moviepunk.R
-import com.codepunk.moviepunk.domain.extension.getPosterUrl
 import com.codepunk.moviepunk.domain.model.Configuration
 import com.codepunk.moviepunk.domain.model.CuratedContentItem
 import com.codepunk.moviepunk.domain.model.CuratedContentType
 import com.codepunk.moviepunk.domain.model.Movie
+import com.codepunk.moviepunk.ui.compose.component.MovieCardView
 import com.codepunk.moviepunk.ui.compose.screen.preview.ScreenPreviews
 import com.codepunk.moviepunk.ui.theme.MoviePunkTheme
 import com.codepunk.moviepunk.ui.theme.dimens
-import com.codepunk.moviepunk.ui.theme.movieCardHeight
-import com.codepunk.moviepunk.ui.theme.movieCardWidth
 import com.codepunk.moviepunk.ui.theme.tmdbWhite
 import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
@@ -58,8 +53,10 @@ fun MoviesScreen(
     /*
     val configuration = LocalConfiguration.current
     val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
      */
+    val density = LocalDensity.current
+    val densityFloat = density.density
+    Timber.i("densityFloat=$densityFloat")
 
     LaunchedEffect(key1 = state) {
         Timber.i("state.configuration.images=${state.configuration.images}")
@@ -230,7 +227,7 @@ fun TrendingSection(
                         key = trendingMovies.itemKey { it.id }
                     ) { index ->
                         trendingMovies[index]?.also { movie ->
-                            MoviePreviewView(
+                            MovieCardView(
                                 configuration = configuration,
                                 movie = movie
                             )
@@ -239,35 +236,6 @@ fun TrendingSection(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun MoviePreviewView(
-    configuration: Configuration,
-    movie: Movie,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .size(movieCardWidth, movieCardHeight)
-    ) {
-        val movieCardWidthPx = with(LocalDensity.current) {
-            movieCardWidth.roundToPx()
-        }
-        val url = configuration.getPosterUrl(
-            path = movie.posterPath,
-            widthPx = movieCardWidthPx
-        )
-        AsyncImage(
-            model = url,
-            contentDescription = movie.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        Text(
-            text = movie.title
-        )
     }
 }
 
